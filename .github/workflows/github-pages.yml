@@ -1,0 +1,48 @@
+# Publishes a DEMO of this website to GitHub Pages on every push to main.
+# Demo = design + chatbot work; forms open WhatsApp; no admin (Pages has no server).
+# The real website (leads, admin, MySQL) runs on Hostinger - see README.
+name: GitHub Pages demo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vite build
+        env:
+          VITE_DEMO: "1"
+          PAGES_BASE: /${{ github.event.repository.name }}/
+      # single-page app: unknown paths load the app instead of a 404
+      - run: cp dist/index.html dist/404.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
