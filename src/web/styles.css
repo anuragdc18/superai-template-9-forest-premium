@@ -191,3 +191,22 @@ h1, h2, .serif { font-family: var(--font-serif); font-weight: 500; letter-spacin
 @keyframes hero-fill { from { width: 0; } to { width: 100%; } }
 .hero-progress { animation: hero-fill 5s linear forwards; }
 .hero-progress.is-paused { animation-play-state: paused; }
+
+/* Blog post text (website + admin editor) */
+.blog-prose { font-size: 17px; line-height: 1.8; overflow-wrap: anywhere; }
+.blog-prose > * + * { margin-top: 1.1em; }
+.blog-prose h2 { font-size: 1.6em; line-height: 1.25; font-weight: 700; margin-top: 1.8em; }
+.blog-prose h3 { font-size: 1.25em; line-height: 1.3; font-weight: 700; margin-top: 1.5em; }
+.blog-prose a { color: var(--color-royal); text-decoration: underline; text-underline-offset: 3px; }
+.blog-prose ul { list-style: disc; padding-left: 1.4em; }
+.blog-prose ol { list-style: decimal; padding-left: 1.4em; }
+.blog-prose li + li { margin-top: 0.4em; }
+.blog-prose li > p { margin: 0; }
+.blog-prose blockquote { border-left: 4px solid var(--color-brand); padding: 0.4em 0 0.4em 1.1em; font-style: italic; }
+.blog-prose img { border-radius: 14px; max-width: 100%; height: auto; margin-left: auto; margin-right: auto; }
+.blog-prose hr { border: 0; border-top: 1px solid var(--color-line); margin: 2em 0; }
+.blog-prose strong { font-weight: 700; }
+.blog-prose code { background: var(--color-surface); padding: 0.1em 0.35em; border-radius: 6px; font-size: 0.9em; }
+.blog-prose p.is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; height: 0; pointer-events: none; color: #94a3b8; }
+.admin-theme .blog-prose { font-size: 16px; color: #334155; }
+.admin-theme .blog-prose h2, .admin-theme .blog-prose h3 { color: #0f172a; }

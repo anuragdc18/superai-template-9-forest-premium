@@ -13,8 +13,16 @@ import {
   Mail,
   Menu,
   Contact,
+  FileText,
+  HelpCircle,
+  Images,
+  Image as ImageIcon,
+  ListChecks,
+  MessageCircle,
+  Package,
   Palette,
   Search,
+  Star,
   UserCog,
   X,
 } from "lucide-react";
@@ -22,11 +30,20 @@ import { authClient, signOut } from "../../lib/auth";
 import { useSite } from "../../queries/site";
 import { useLeads } from "../../queries/leads";
 
-type NavItem = { to: string; label: string; icon: typeof Inbox; badge?: "new" | "total" };
+type NavItem = { to: string; label: string; icon: typeof Inbox; badge?: "new" | "total"; group?: string };
 
 const NAV: NavItem[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/leads", label: "Leads", icon: Inbox, badge: "new" },
+  { to: "/admin/blog", label: "Blog", icon: FileText, group: "Website content" },
+  { to: "/admin/packages", label: "Packages", icon: Package },
+  { to: "/admin/services", label: "Services", icon: ListChecks },
+  { to: "/admin/reviews", label: "Reviews", icon: Star },
+  { to: "/admin/faqs", label: "FAQs", icon: HelpCircle },
+  { to: "/admin/images", label: "Banners & Images", icon: ImageIcon },
+  { to: "/admin/gallery", label: "Gallery / Our Work", icon: Images },
+  { to: "/admin/seo", label: "SEO & Google", icon: Search, group: "Settings" },
+  { to: "/admin/whatsapp", label: "WhatsApp", icon: MessageCircle },
   { to: "/admin/contact", label: "Contact Info", icon: Contact },
   { to: "/admin/bot", label: "Chat Bot", icon: Bot },
   { to: "/admin/branding", label: "Logo & Colours", icon: Palette },
@@ -98,14 +115,15 @@ function Sidebar({ userName, onNavigate }: { userName: string; onNavigate?: () =
 
       <nav className="flex-1 overflow-y-auto py-4">
         {NAV.map((n) => {
-          const active = loc === n.to;
+          const active = loc === n.to || (n.to !== "/admin/dashboard" && loc.startsWith(n.to + "/"));
           const count = n.badge === "new" ? counts.fresh : n.badge === "total" ? counts.total : 0;
           return (
+            <div key={n.to}>
+            {n.group && <p className="px-6 pb-1.5 pt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">{n.group}</p>}
             <Link
-              key={n.to}
               to={n.to}
               onClick={onNavigate}
-              className={`group relative flex items-center gap-3.5 px-6 py-3 text-[14px] font-medium transition ${
+              className={`group relative flex items-center gap-3.5 px-6 py-2.5 text-[14px] font-medium transition ${
                 active ? "bg-blue-50/60 text-blue-700" : "hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
@@ -122,6 +140,7 @@ function Sidebar({ userName, onNavigate }: { userName: string; onNavigate?: () =
                 </span>
               )}
             </Link>
+            </div>
           );
         })}
       </nav>

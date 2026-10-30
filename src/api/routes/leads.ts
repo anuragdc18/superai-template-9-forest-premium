@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { base } from "../__core/app";
 import { authed } from "../middleware/auth";
-import { data, save, type Lead } from "../store";
+import { data, save, STORAGE, type Lead } from "../store";
 import { LEAD_STATUSES } from "../lib/lead-status";
 
 export const leadInput = z.object({
@@ -36,7 +36,9 @@ export async function insertLead(input: z.infer<typeof leadInput>) {
 export const leads = {
   create: base.input(leadInput).handler(async ({ input }) => {
     const lead = await insertLead(input);
-    return { ok: true, id: lead.id };
+    // Vercel without a database can't keep leads — tell the browser to send it on WhatsApp too
+    const temporary = STORAGE === "file" && !!process.env.VERCEL;
+    return { ok: true, id: lead.id, temporary };
   }),
   list: authed.handler(() => [...data.leads].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())),
   setStatus: authed
@@ -45,6 +47,17 @@ export const leads = {
       const lead = data.leads.find((l) => l.id === input.id);
       if (lead) {
         lead.status = input.status;
+        save();
+      }
+      return { ok: true };
+    }),
+  update: authed
+    .input(z.object({ id: z.number(), note: z.string().trim().max(2000), followUp: z.string().regex(/^$|^\d{4}-\d{2}-\d{2}$/) }))
+    .handler(async ({ input }) => {
+      const lead = data.leads.find((l) => l.id === input.id);
+      if (lead) {
+        lead.note = input.note || undefined;
+        lead.followUp = input.followUp || undefined;
         save();
       }
       return { ok: true };

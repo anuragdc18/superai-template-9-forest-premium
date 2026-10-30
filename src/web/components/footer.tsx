@@ -3,8 +3,10 @@ import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Youtube } from "luc
 import { CATEGORIES, serviceUrl } from "../lib/site";
 import { telHref, useSite } from "../queries/site";
 import { Logo } from "./header";
+import { useExtraLinks } from "./content-ui";
 
 export function Footer() {
+  const extra = useExtraLinks();
   const site = useSite();
   const reg = CATEGORIES[0];
   const brandDesign = [CATEGORIES[1], CATEGORIES[2]];
@@ -66,6 +68,9 @@ export function Footer() {
           <ul className="space-y-2.5 text-[15px]">
             {digital.map((c) => (
               <li key={c.slug}><Link to={`/services/${c.slug}`} className="hover:text-cream">{c.title}</Link></li>
+            ))}
+            {extra.map((x) => (
+              <li key={x.to}><Link to={x.to} className="hover:text-cream">{x.label}</Link></li>
             ))}
             <li><Link to="/contact" className="hover:text-cream">Contact Us</Link></li>
           </ul>

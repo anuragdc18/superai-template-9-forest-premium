@@ -32,7 +32,13 @@ export default function LoginPage() {
     setBusy(true);
     const res = await authClient.signIn.username({ username: username.trim().toLowerCase(), password });
     setBusy(false);
-    if (res.error) return setError("Wrong username or password.");
+    if (res.error) {
+      const status = res.error.status;
+      if (status === 401 || status === 400) return setError("Wrong username or password.");
+      if (status === 503) return setError("The website can't reach its database. Check the DB settings on the hosting.");
+      if (status === 429) return setError("Too many tries. Please wait a minute and try again.");
+      return setError(`Login failed (${status ?? "network"}): ${res.error.message ?? "please try again"}`);
+    }
     await qc.invalidateQueries();
     navigate("/admin/dashboard");
   };

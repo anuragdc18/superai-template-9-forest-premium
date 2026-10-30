@@ -11,6 +11,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import api from "./api";
 import { initStore, STORAGE, DATA_FILE } from "./api/store";
+import { renderPage, robotsTxt, siteOrigin, sitemapXml } from "./api/render";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = [here, path.resolve(here, ".."), process.cwd()].find((d) => fs.existsSync(path.join(d, "dist", "index.html"))) ?? process.cwd();
@@ -60,11 +61,22 @@ async function handle(request: Request): Promise<Response> {
   const url = new URL(request.url);
   if (url.pathname.startsWith("/api")) return api.fetch(request);
   if (request.method !== "GET" && request.method !== "HEAD") return new Response("Method not allowed", { status: 405 });
-  const file = url.pathname !== "/" ? staticFile(url.pathname) : null;
+  const file = url.pathname !== "/" && url.pathname !== "/index.html" ? staticFile(url.pathname) : null;
   if (file) return file;
   if (!fs.existsSync(indexHtml)) return new Response("Website not built yet. Run `npm run build` first.", { status: 500 });
-  // single-page app: every other path gets index.html
-  return new Response(fs.readFileSync(indexHtml), { headers: { "content-type": TYPES[".html"], "cache-control": "no-cache" } });
+  try {
+    await initStore();
+    const origin = siteOrigin(request);
+    if (url.pathname === "/sitemap.xml") return new Response(await sitemapXml(origin), { headers: { "content-type": "application/xml; charset=utf-8" } });
+    if (url.pathname === "/robots.txt") return new Response(robotsTxt(origin), { headers: { "content-type": "text/plain; charset=utf-8" } });
+    // single-page app: every page gets index.html, with its own SEO head filled in
+    const { html, status, redirect } = await renderPage(fs.readFileSync(indexHtml, "utf8"), url.pathname, origin);
+    if (redirect) return new Response(null, { status, headers: { location: redirect } });
+    return new Response(html, { status, headers: { "content-type": TYPES[".html"], "cache-control": "no-cache" } });
+  } catch (err) {
+    console.error("Page head could not be rendered — sending the plain page.", err);
+    return new Response(fs.readFileSync(indexHtml), { headers: { "content-type": TYPES[".html"], "cache-control": "no-cache" } });
+  }
 }
 
 /** Port: PORT from the hosting (Hostinger sets it), else the one in __ports.cjs. */

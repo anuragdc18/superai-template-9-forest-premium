@@ -128,3 +128,70 @@ In the demo: all pages, design and the chatbot work; forms and chatbot leads **o
 details filled in; the admin panel is hidden. GitHub Pages has no server, so leads/admin only work on
 the real hosting (Hostinger). Turn it on with `enable-github-pages.ps1`
 (Settings → Pages → Source: **GitHub Actions**). Free GitHub accounts need the repository to be public.
+
+## Deploy on Vercel
+
+Vercel runs the website and the API (admin, leads, chatbot) — but it **cannot store files**, so it needs a **MySQL database** (for example the one in your Hostinger plan).
+
+1. **Database (Hostinger):** hPanel → Databases → create a MySQL database + user.
+   Then hPanel → Databases → **Remote MySQL** → add host `%` (any host) for that database, so Vercel can connect.
+   Note the **host name** shown there (looks like `srv123.hstgr.io` or an IP address).
+2. **Vercel:** Add New → Project → import this GitHub repo. Leave Framework = Other; `vercel.json` sets the build.
+3. **Environment Variables** (Vercel → Project → Settings → Environment Variables):
+
+   | Name | Value |
+   |---|---|
+   | `DB_HOST` | the remote MySQL host from step 1 |
+   | `DB_PORT` | `3306` |
+   | `DB_NAME` | database name |
+   | `DB_USER` | database user |
+   | `DB_PASSWORD` | database password |
+   | `BETTER_AUTH_SECRET` | a long random string (40+ characters) |
+   | `WEBSITE_URL` | your site address, e.g. `https://your-project.vercel.app` (or your domain) |
+
+   Cloud MySQL that needs a secure connection (Aiven, TiDB Cloud…): also add `DB_SSL` = `true`.
+4. **Deploy.** Then open `/admin` (admin / Welcome@123!!!) and **change the password** in Admin → Account.
+5. Custom domain: Vercel → Settings → Domains. Update `WEBSITE_URL` to the domain and redeploy.
+
+**Forgot the admin password?** Add `ADMIN_PASSWORD` (8+ characters) in the environment variables, redeploy, log in with it, then remove the variable.
+
+Without the DB_* settings the site still opens, but leads and admin changes are lost — always add the database.
+
+## SEO, sitemap & Google Analytics
+
+Built in — every `npm run build` / Vercel build creates:
+
+- a ready-made page head for **all 160 pages** (title, description, canonical link, WhatsApp/Facebook preview, Google structured data: business, founder, services, breadcrumbs)
+- `/sitemap.xml` and `/robots.txt`
+
+Settings (Vercel / Hostinger → Environment Variables, then redeploy):
+
+| Name | Value |
+|---|---|
+| `WEBSITE_URL` | final address, e.g. `https://clientdomain.com` — used in sitemap + canonical links |
+| `GA_ID` | Google Analytics 4 Measurement ID, e.g. `G-ABC123XYZ` (optional) |
+| `GOOGLE_SITE_VERIFICATION` | code from Google Search Console → HTML tag method (optional) |
+
+Analytics also records: `generate_lead` (forms + chatbot), `click_whatsapp`, `click_call`, `click_email`.
+In GA4 → Admin → Events, mark `generate_lead` as a **key event** to see leads as conversions.
+
+After going live: Google Search Console → add the domain → Sitemaps → submit `sitemap.xml`.
+Also create a free **Google Business Profile** for local "near me" searches in their city.
+
+## Admin panel — everything you can change
+
+| Admin page | What it does |
+|---|---|
+| **Leads** | All enquiries. Search, filter by status or date, **notes + follow-up date**, one-tap Call / WhatsApp, **Export CSV** (Excel). Dashboard shows *Today's follow-ups*. |
+| **Blog** | Write posts in a simple editor (headings, bold, lists, links, images). Featured image, category, tags, author, **draft / publish / schedule**, own SEO title, description and share image. Posts appear on `/blog`, on the home page and in the sitemap. |
+| **Packages** | Price plans (Basic / Standard / Premium…): price, billing, features, *Most Popular*, Enquire or WhatsApp button. Link a package to a category or a single service to show it on those service pages. Page: `/packages`. |
+| **Services** | Rename services, change descriptions and time taken, hide services, add new ones. Old addresses of renamed services redirect automatically. |
+| **Reviews** | Add / edit / hide reviews, Google rating and link. Optional review stars in Google (only for real reviews). |
+| **FAQs** | Questions and answers on the home page (also sent to Google as FAQ data). |
+| **Banners & Images** | Replace the home page banner photos, service category images and the default share image (upload → Save). "Use original" puts the template photo back. |
+| **Gallery / Our Work** | Work photos with title, category, link. Page: `/gallery` (appears once a photo is added). |
+| **SEO & Google** | Google Analytics ID, Search Console code, business details for Google (type, address, PIN, map, hours, price range, areas served, other profiles), own title / description / share image for any page with a Google preview, and extra structured data (JSON-LD). |
+| **WhatsApp** | Main number, default message, show/hide the floating button, message used on service pages, own message per service, second number (e.g. Support). |
+
+Uploaded images are resized in the browser and stored in the database (`site_images` table) — or in `data/uploads` when there is no database.
+Every page is sent with its own SEO head by the server, and `/sitemap.xml` + `/robots.txt` update automatically.

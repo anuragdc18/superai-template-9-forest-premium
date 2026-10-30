@@ -6,8 +6,17 @@ import { DEFAULT_SITE } from "../../api/lib/site-schema";
 
 export const DEMO = import.meta.env.VITE_DEMO === "1";
 
-/** Path of a file in public/, working under a sub-folder (e.g. user.github.io/repo/). */
-export const asset = (p: string) => import.meta.env.BASE_URL.replace(/\/$/, "") + p;
+/** Images replaced in Admin → Images: "/images/hero.jpg" → "/api/img/…". Filled in when content loads. */
+export const imageOverrides: Record<string, string> = {};
+
+/** Path of a file in public/, working under a sub-folder (e.g. user.github.io/repo/). Uses the replacement image if there is one. */
+export const asset = (p: string) => imageOverrides[p] || import.meta.env.BASE_URL.replace(/\/$/, "") + p;
+
+/** Original public/ path of an asset() result ("/repo/images/x.jpg" → "/images/x.jpg"). */
+export const assetPath = (url: string) => {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  return base && url.startsWith(base + "/") ? url.slice(base.length) : url;
+};
 
 type LeadInput = { name: string; phone: string; email?: string; service: string; message?: string; source?: string };
 
@@ -23,5 +32,5 @@ export async function demoLead(input: LeadInput) {
   const url = `https://wa.me/${DEFAULT_SITE.whatsapp}?text=${encodeURIComponent(text)}`;
   const win = window.open(url, "_blank", "noopener");
   if (!win) window.location.href = url;
-  return { ok: true as const, id: 0 };
+  return { ok: true, id: 0, temporary: false };
 }

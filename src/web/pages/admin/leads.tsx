@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useSearch } from "wouter";
-import { Bot, Download, Inbox, Loader2, Phone, Search, Trash2 } from "lucide-react";
+import { Bot, CalendarClock, Download, Inbox, Loader2, Phone, Search, StickyNote, Trash2 } from "lucide-react";
 import { AdminLayout, Card } from "./layout";
-import { useLeads, useRemoveLead, useSetLeadStatus } from "../../queries/leads";
+import { useLeads, useRemoveLead, useSetLeadStatus, useUpdateLead } from "../../queries/leads";
 import { WaIcon } from "../../components/header";
 import { LEAD_STATUSES as STATUSES, LEAD_STATUS_LABEL, type LeadStatus as Status } from "../../../api/lib/lead-status";
 import { STATUS_STYLE } from "./lead-styles";
@@ -20,6 +20,40 @@ const sourceLabel = (s: string | null) => {
   return `${kind === "service" ? "Service" : "Category"} · ${rest?.replace(/-/g, " ")}`;
 };
 
+const today = () => new Date().toLocaleDateString("en-CA");
+
+/** Private note + follow-up date for one lead. */
+function LeadNotes({ id, note, followUp, onClose }: { id: number; note?: string; followUp?: string; onClose: () => void }) {
+  const update = useUpdateLead();
+  const [n, setN] = useState(note ?? "");
+  const [f, setF] = useState(followUp ?? "");
+  return (
+    <div className="grid gap-3 rounded-md bg-slate-50 p-4 sm:grid-cols-[1fr_180px_auto] sm:items-end">
+      <label className="grid gap-1.5 text-[13px] font-semibold text-slate-600">
+        Note (only you can see this)
+        <textarea className="field !h-20 py-2" value={n} onChange={(e) => setN(e.target.value)} placeholder="e.g. Called on Monday, sending quote" />
+      </label>
+      <label className="grid gap-1.5 text-[13px] font-semibold text-slate-600">
+        Follow up on
+        <input type="date" className="field" value={f} onChange={(e) => setF(e.target.value)} />
+      </label>
+      <div className="flex gap-2">
+        <button type="button" onClick={onClose} className="h-11 rounded-md px-4 text-[14px] font-semibold text-slate-500 hover:bg-white">
+          Cancel
+        </button>
+        <button
+          type="button"
+          disabled={update.isPending}
+          onClick={() => update.mutate({ id, note: n, followUp: f }, { onSuccess: onClose })}
+          className="flex h-11 items-center gap-2 rounded-md bg-blue-600 px-5 text-[14px] font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+        >
+          {update.isPending && <Loader2 className="h-4 w-4 animate-spin" />} Save
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function LeadsPage() {
   const { data, isPending, error } = useLeads();
   const setStatus = useSetLeadStatus();
@@ -31,6 +65,10 @@ export default function LeadsPage() {
     if (v !== null) setQ(v);
   }, [search]);
   const [filter, setFilter] = useState<"all" | Status>("all");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [onlyFollowUp, setOnlyFollowUp] = useState(() => new URLSearchParams(search).get("followup") === "1");
+  const [notesFor, setNotesFor] = useState<number | null>(null);
 
   const leads = useMemo(() => data ?? [], [data]);
   const counts = useMemo(() => {
@@ -44,15 +82,18 @@ export default function LeadsPage() {
     return leads.filter(
       (l) =>
         (filter === "all" || ((STATUSES as readonly string[]).includes(l.status ?? "new") ? (l.status ?? "new") : "new") === filter) &&
-        (!t || [l.name, l.phone, l.service, l.email ?? "", l.message ?? ""].some((v) => v.toLowerCase().includes(t))),
+        (!t || [l.name, l.phone, l.service, l.email ?? "", l.message ?? "", l.note ?? ""].some((v) => v.toLowerCase().includes(t))) &&
+        (!from || new Date(l.createdAt).toLocaleDateString("en-CA") >= from) &&
+        (!to || new Date(l.createdAt).toLocaleDateString("en-CA") <= to) &&
+        (!onlyFollowUp || (!!l.followUp && l.followUp <= today())),
     );
-  }, [leads, q, filter]);
+  }, [leads, q, filter, from, to, onlyFollowUp]);
 
   const exportCsv = () => {
-    const head = ["Date", "Name", "Phone", "Email", "Service", "Message", "Source", "Status"];
+    const head = ["Date", "Name", "Phone", "Email", "Service", "Message", "Source", "Status", "Note", "Follow up"];
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const lines = rows.map((l) =>
-      [new Date(l.createdAt).toISOString(), l.name, l.phone, l.email, l.service, l.message, sourceLabel(l.source), LEAD_STATUS_LABEL[(l.status ?? "new") as Status] ?? l.status]
+      [new Date(l.createdAt).toISOString(), l.name, l.phone, l.email, l.service, l.message, sourceLabel(l.source), LEAD_STATUS_LABEL[(l.status ?? "new") as Status] ?? l.status, l.note, l.followUp]
         .map(esc)
         .join(","),
     );
@@ -101,6 +142,19 @@ export default function LeadsPage() {
               onChange={(e) => setQ(e.target.value)}
             />
           </label>
+          <label className="flex items-center gap-2 text-[13px] text-slate-500">
+            From
+            <input aria-label="From date" type="date" className="field !h-11 !w-[150px]" value={from} onChange={(e) => setFrom(e.target.value)} />
+            to
+            <input aria-label="To date" type="date" className="field !h-11 !w-[150px]" value={to} onChange={(e) => setTo(e.target.value)} />
+          </label>
+          <button
+            type="button"
+            onClick={() => setOnlyFollowUp((v) => !v)}
+            className={`flex h-11 items-center gap-2 rounded-md px-4 text-[14px] font-semibold ${onlyFollowUp ? "bg-amber-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+          >
+            <CalendarClock className="h-4 w-4" /> Follow-ups due
+          </button>
           <button
             onClick={exportCsv}
             disabled={!rows.length}
@@ -132,7 +186,7 @@ export default function LeadsPage() {
                   <th className="px-4 py-3 font-semibold">Source</th>
                   <th className="px-4 py-3 font-semibold">Date</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 text-right font-semibold">Delete</th>
+                  <th className="px-4 py-3 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -140,7 +194,8 @@ export default function LeadsPage() {
                   const raw = (l.status ?? "new") as Status;
                   const status: Status = STATUSES.includes(raw) ? raw : "new";
                   return (
-                    <tr key={l.id} className="align-top hover:bg-surface/60">
+                    <Fragment key={l.id}>
+                    <tr className="align-top hover:bg-surface/60">
                       <td className="px-4 py-3.5">
                         <p className="font-semibold text-navy">{l.name}</p>
                         <div className="mt-1 flex items-center gap-3 text-[13px]">
@@ -157,6 +212,12 @@ export default function LeadsPage() {
                           </a>
                         </div>
                         {l.email && <p className="mt-0.5 text-[13px] text-slate-500">{l.email}</p>}
+                        {l.note && <p className="mt-1.5 max-w-xs rounded bg-amber-50 px-2 py-1 text-[12.5px] text-amber-900">📝 {l.note}</p>}
+                        {l.followUp && (
+                          <p className={`mt-1 text-[12.5px] font-semibold ${l.followUp <= today() ? "text-red-600" : "text-slate-500"}`}>
+                            Follow up: {new Date(l.followUp + "T00:00").toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                          </p>
+                        )}
                       </td>
                       <td className="px-4 py-3.5">
                         <p className="font-medium text-navy">{l.service}</p>
@@ -190,7 +251,15 @@ export default function LeadsPage() {
                           <span className="pointer-events-none absolute right-3 text-[10px]">▼</span>
                         </label>
                       </td>
-                      <td className="px-4 py-3.5 text-right">
+                      <td className="whitespace-nowrap px-4 py-3.5 text-right">
+                        <button
+                          onClick={() => setNotesFor(notesFor === l.id ? null : l.id)}
+                          aria-label="Note and follow-up"
+                          title="Note & follow-up"
+                          className="rounded-lg p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600"
+                        >
+                          <StickyNote className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() => confirm(`Delete lead from ${l.name}?`) && remove.mutate({ id: l.id })}
                           aria-label="Delete lead"
@@ -200,6 +269,14 @@ export default function LeadsPage() {
                         </button>
                       </td>
                     </tr>
+                    {notesFor === l.id && (
+                      <tr>
+                        <td colSpan={6} className="px-4 pb-4">
+                          <LeadNotes id={l.id} note={l.note} followUp={l.followUp} onClose={() => setNotesFor(null)} />
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
                   );
                 })}
               </tbody>

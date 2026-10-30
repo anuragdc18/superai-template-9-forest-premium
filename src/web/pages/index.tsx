@@ -21,6 +21,8 @@ import { asset } from "../lib/demo";
 import { useSite } from "../queries/site";
 import { LeadForm } from "../components/lead-form";
 import { WaIcon } from "../components/header";
+import { useContent } from "../queries/content";
+import { PostCard } from "../components/content-ui";
 
 const MS = CATEGORIES.find((c) => c.slug === "microsoft-certifications")!;
 const TOTAL_SERVICES = CATEGORIES.reduce((n, c) => n + c.services.length, 0);
@@ -37,7 +39,7 @@ const fromSlide = (slug: string, image: string): HeroSlide => {
     tag: s.tag,
     title: s.title,
     text: s.text,
-    image: asset(`/images/${image}`),
+    image: `/images/${image}`,
     primary: { label: s.cta || s.linkText, to: s.cta ? "#enquiry" : s.link },
     secondary: { label: s.cta ? s.linkText : "Talk to an expert", to: s.cta ? s.link : "/contact" },
   };
@@ -48,7 +50,7 @@ const HERO: HeroSlide[] = [
     tag: "Business services · 100% online",
     title: "Everything Your Business Needs",
     text: "Registration, logo & branding, websites, social media, AI tools and Microsoft certifications — all in one place, handled by experts.",
-    image: asset("/images/hero-all.jpg"),
+    image: "/images/hero-all.jpg",
     primary: { label: "Get Free Consultation", to: "#enquiry" },
     secondary: { label: "Talk to an expert", to: "/contact" },
   },
@@ -134,7 +136,7 @@ function Hero() {
             {HERO.map((s, idx) => (
               <img
                 key={s.image + idx}
-                src={s.image}
+                src={asset(s.image)}
                 alt=""
                 aria-hidden={idx !== i}
                 loading={idx === 0 ? "eager" : "lazy"}
@@ -428,14 +430,12 @@ const WHY = [
   { title: "Real experts", text: "CA, CS and design experts guide you at every step." },
 ];
 
-const REVIEWS = [
-  { name: "Ravi K.", city: "Hyderabad", text: "My GST and company registration were done in a week. Very smooth, and they explained everything simply." },
-  { name: "Priya S.", city: "Bengaluru", text: "They designed our logo and website together. Looks very professional and customers notice it." },
-  { name: "Arjun M.", city: "Pune", text: "Our Instagram enquiries doubled in 2 months. The team posts on time every week." },
-];
 
 function TrustReviews() {
   const site = useSite();
+  const content = useContent();
+  const rs = content.reviewsSection;
+  const REVIEWS = rs.show ? content.reviews.slice(0, 3) : [];
   return (
     <section className="border-t border-line bg-paper py-20 sm:py-24">
       <div className="container-x grid gap-14 lg:grid-cols-[0.9fr_1.3fr]">
@@ -456,30 +456,62 @@ function TrustReviews() {
             ))}
           </ul>
         </div>
+        {REVIEWS.length > 0 && (
         <div className="lg:border-l lg:border-line lg:pl-14">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h3 className="serif text-[28px] font-medium">What our clients say</h3>
-            <p className="flex items-center gap-2">
-              <span className="serif text-[32px] leading-none text-navy">4.8</span>
-              <span className="flex text-brand">{[0, 1, 2, 3, 4].map((k) => <Star key={k} className="h-4 w-4 fill-current" />)}</span>
-              <span className="text-[13px]">on Google</span>
-            </p>
+            {rs.rating && (
+              <a href={rs.googleUrl || undefined} target="_blank" rel="noreferrer" className="flex items-center gap-2">
+                <span className="serif text-[32px] leading-none text-navy">{rs.rating}</span>
+                <span className="flex text-brand">{[0, 1, 2, 3, 4].map((k) => <Star key={k} className="h-4 w-4 fill-current" />)}</span>
+                <span className="text-[13px]">on Google{rs.ratingCount ? ` (${rs.ratingCount})` : ""}</span>
+              </a>
+            )}
           </div>
           <div className="mt-7 grid gap-4 sm:grid-cols-2">
             {REVIEWS.map((r, idx) => (
-              <figure key={r.name} className={`flex flex-col rounded-2xl border border-line bg-cream p-6 ${idx === 0 ? "sm:col-span-2" : ""}`}>
-                <span className="serif text-[42px] leading-[0.6] text-brand">“</span>
+              <figure key={r.id} className={`flex flex-col rounded-2xl border border-line bg-cream p-6 ${idx === 0 ? "sm:col-span-2" : ""}`}>
+                <span className="flex text-brand">{Array.from({ length: r.rating }, (_, k) => <Star key={k} className="h-3.5 w-3.5 fill-current" />)}</span>
+                <span className="serif mt-3 text-[42px] leading-[0.6] text-brand">“</span>
                 <blockquote className={`mt-3 leading-relaxed text-navy ${idx === 0 ? "serif text-[19px]" : "text-[15px]"}`}>{r.text}</blockquote>
                 <figcaption className="mt-5 flex items-center gap-3">
                   <span className="serif grid h-10 w-10 place-items-center rounded-full bg-sand text-[16px] text-navy">{r.name[0]}</span>
                   <span className="leading-tight">
                     <span className="block font-semibold text-navy">{r.name}</span>
-                    <span className="text-[13px]">{r.city}</span>
+                    <span className="text-[13px]">{r.place}</span>
                   </span>
                 </figcaption>
               </figure>
             ))}
           </div>
+        </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── Latest blog posts ───────────────────────── */
+
+function LatestPosts() {
+  const content = useContent();
+  if (!content.blog.show || !content.posts.length) return null;
+  return (
+    <section className="border-t border-line bg-paper py-20 sm:py-24">
+      <div className="container-x">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow">{content.blog.title || "Blog"}</p>
+            <h2 className="mt-3 text-[34px] leading-tight sm:text-[40px]">Tips &amp; guides</h2>
+          </div>
+          <Link to="/blog" className="inline-flex items-center gap-1.5 font-semibold text-brand hover:gap-2.5">
+            See all articles <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {content.posts.slice(0, 3).map((p) => (
+            <PostCard key={p.id} p={p} />
+          ))}
         </div>
       </div>
     </section>
@@ -488,16 +520,11 @@ function TrustReviews() {
 
 /* ───────────────────────── 10. FAQ ───────────────────────── */
 
-const FAQS = [
-  { q: "Do I need to visit your office?", a: "No. Everything is done online. You can share documents on WhatsApp or email." },
-  { q: "How long does GST registration take?", a: "Usually 3 to 7 working days, once we have all your documents." },
-  { q: "Can you do registration and the website together?", a: "Yes. Many clients start with registration and logo, then add a website. We offer combo prices." },
-  { q: "How do I pay?", a: "You can pay by UPI, debit/credit card or bank transfer. You get a proper GST invoice." },
-  { q: "I'm not sure which registration I need. Can you help?", a: "Yes — that's what the free consultation is for. Our expert will suggest the right option for you." },
-];
 
 function Faq() {
   const [open, setOpen] = useState<number | null>(0);
+  const FAQS = useContent().faqs;
+  if (!FAQS.length) return null;
   return (
     <section className="bg-cream py-20 sm:py-24">
       <div className="container-x max-w-3xl">
@@ -509,7 +536,7 @@ function Faq() {
           {FAQS.map((f, idx) => {
             const isOpen = open === idx;
             return (
-              <div key={f.q} className={idx ? "border-t border-line" : ""}>
+              <div key={f.id} className={idx ? "border-t border-line" : ""}>
                 <button
                   onClick={() => setOpen(isOpen ? null : idx)}
                   aria-expanded={isOpen}
@@ -572,6 +599,7 @@ export default function Index() {
       <Process />
       <Story />
       <TrustReviews />
+      <LatestPosts />
       <Faq />
       <CtaBand />
     </>

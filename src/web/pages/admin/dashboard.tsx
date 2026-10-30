@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "wouter";
-import { ArrowRight, Bot, CalendarDays, CheckCircle2, Contact, Globe, Palette, UserPlus, Users } from "lucide-react";
+import { ArrowRight, Bot, CalendarClock, CalendarDays, CheckCircle2, Contact, FileText, Globe, Package, Palette, Phone, Search, UserPlus, Users } from "lucide-react";
+import { WaIcon } from "../../components/header";
 import { AdminLayout, Card } from "./layout";
 import { useLeads } from "../../queries/leads";
 import { LEAD_STATUSES, LEAD_STATUS_LABEL, type LeadStatus } from "../../../api/lib/lead-status";
@@ -69,9 +70,47 @@ export default function DashboardPage() {
     { label: "Total Leads", value: stats.total, icon: Users, bg: "bg-[#1572e8]" },
   ];
   const v = (n: number) => (isPending ? "–" : n.toLocaleString("en-IN"));
+  const todayKey = new Date().toLocaleDateString("en-CA");
+  const followUps = leads.filter((l) => l.followUp && l.followUp <= todayKey && !["converted", "closed", "not_interested"].includes(l.status ?? "new"));
 
   return (
     <AdminLayout title="Dashboard">
+      {followUps.length > 0 && (
+        <Card
+          className="mb-6 border-l-4 border-amber-400"
+          title={`Today's follow-ups (${followUps.length})`}
+          subtitle="Leads you planned to call back today or earlier"
+          right={
+            <Link to="/admin/leads?followup=1" className="text-[13.5px] font-semibold text-blue-600 hover:underline">
+              See all
+            </Link>
+          }
+          bodyClass="divide-y divide-slate-100"
+        >
+          {followUps.slice(0, 6).map((l) => (
+            <div key={l.id} className="flex flex-wrap items-center gap-3 px-5 py-3">
+              <CalendarClock className={`h-4 w-4 ${l.followUp! < todayKey ? "text-red-500" : "text-amber-500"}`} />
+              <div className="min-w-[180px] flex-1">
+                <p className="text-[14px] font-semibold text-slate-800">
+                  {l.name} <span className="font-normal text-slate-500">· {l.service}</span>
+                </p>
+                {l.note && <p className="text-[12.5px] text-slate-500">{l.note}</p>}
+              </div>
+              <a href={`tel:+91${l.phone}`} className="flex items-center gap-1 rounded-md border border-slate-200 px-3 py-1.5 text-[13px] font-semibold text-slate-600 hover:text-blue-600">
+                <Phone className="h-3.5 w-3.5" /> Call
+              </a>
+              <a
+                href={`https://wa.me/91${l.phone}?text=${encodeURIComponent(`Hi ${l.name}, following up on your enquiry for ${l.service}.`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 rounded-md bg-[#25d366] px-3 py-1.5 text-[13px] font-semibold text-white"
+              >
+                <WaIcon className="h-3.5 w-3.5" /> WhatsApp
+              </a>
+            </div>
+          ))}
+        </Card>
+      )}
       <div className="grid grid-cols-2 gap-3 sm:gap-5 xl:grid-cols-4">
         {cards.map((c) => (
           <div key={c.label} className={`flex items-center gap-3 rounded-md px-4 py-4 text-white sm:gap-5 sm:px-6 sm:py-5 shadow-[0_6px_18px_-10px_rgba(0,0,0,0.35)] ${c.bg}`}>
@@ -204,6 +243,9 @@ export default function DashboardPage() {
           <Card title="Quick Actions">
             <div className="grid grid-cols-3 gap-3">
               {[
+                { to: "/admin/blog/new", label: "Write a Post", icon: FileText, tone: "bg-violet-50 text-violet-600" },
+                { to: "/admin/packages", label: "Packages", icon: Package, tone: "bg-amber-50 text-amber-600" },
+                { to: "/admin/seo", label: "SEO & Google", icon: Search, tone: "bg-sky-50 text-sky-600" },
                 { to: "/admin/contact", label: "Contact Info", icon: Contact, tone: "bg-orange-50 text-orange-600" },
                 { to: "/admin/bot", label: "Chat Bot", icon: Bot, tone: "bg-green-50 text-green-600" },
                 { to: "/admin/branding", label: "Logo & Colours", icon: Palette, tone: "bg-blue-50 text-blue-600" },

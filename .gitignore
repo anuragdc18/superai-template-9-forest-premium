@@ -78,3 +78,9 @@ data/
 
 # server bundle
 build/
+
+# Vercel build output
+.vercel
+
+# local junk folder
+_to_delete/

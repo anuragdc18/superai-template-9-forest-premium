@@ -5,6 +5,7 @@ import { Clock, Mail, Menu, Minus, Phone, Plus, X, ArrowRight, LayoutDashboard }
 import { CATEGORIES, serviceUrl, waLink } from "../lib/site";
 import { telHref, useSite } from "../queries/site";
 import { authClient } from "../lib/auth";
+import { useExtraLinks } from "./content-ui";
 
 export function Logo({ light = false }: { light?: boolean }) {
   const site = useSite();
@@ -32,6 +33,7 @@ function WaIcon({ className = "h-4 w-4" }: { className?: string }) {
 export { WaIcon };
 
 export function Header() {
+  const extra = useExtraLinks();
   const [open, setOpen] = useState(false);
   const [acc, setAcc] = useState<string | null>("registration");
   const [scrolled, setScrolled] = useState(false);
@@ -131,6 +133,26 @@ export function Header() {
                 </div>
               </div>
             ))}
+            {extra.length > 0 && (
+              <div className="group relative">
+                <button type="button" className={`flex items-center whitespace-nowrap px-2.5 py-2 text-[14px] font-medium transition xl:px-3 ${
+                    extra.some((x) => loc.startsWith(x.to)) ? "text-brand" : "text-navy group-hover:text-brand"
+                  }`}>
+                  More
+                  
+                </button>
+                <div className="invisible absolute right-0 top-full w-[220px] translate-y-2 pt-3 opacity-0 transition duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  <div className="rounded-xl border border-line bg-paper p-2 shadow-[0_24px_50px_-24px_rgba(24,53,40,0.4)]">
+                    {[...extra, { to: "/contact", label: "Contact Us" }].map((x) => (
+                      <Link key={x.to} to={x.to} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[14px] text-navy hover:bg-sand hover:text-brand">
+                        <span className="h-1.5 w-1.5 rounded-full bg-moss" />
+                        {x.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </nav>
           <div className="hidden min-[1150px]:block">
             <Link to="/contact" className="btn-brand !px-5 !py-2.5 !text-[14px]">
@@ -205,6 +227,11 @@ export function Header() {
                 </div>
               );
             })}
+            {[...extra, { to: "/contact", label: "Contact Us" }].map((x) => (
+              <Link key={x.to} to={x.to} className="block border-b border-line py-3.5 font-semibold text-navy">
+                {x.label}
+              </Link>
+            ))}
             <Link to="/contact" className="btn-brand mt-5 w-full">
               Get Started
             </Link>

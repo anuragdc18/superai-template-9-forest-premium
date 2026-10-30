@@ -21,6 +21,10 @@ export type Lead = {
   source: string;
   status: string;
   createdAt: Date;
+  /** Owner's private note (Admin → Leads). */
+  note?: string;
+  /** Follow-up date YYYY-MM-DD (shown on the dashboard on that day). */
+  followUp?: string;
 };
 
 /** A question the chatbot couldn't answer (shown in Admin → Chat Bot). */
@@ -54,7 +58,11 @@ function findRoot(): string {
   }
   return process.cwd();
 }
-export const DATA_FILE = path.resolve(process.env.DATA_FILE || path.join(findRoot(), "data/db.json"));
+// On Vercel the project folder is read-only, so a file can only live in /tmp (temporary!).
+// Real sites on Vercel must use MySQL (DB_* or DATABASE_URL settings).
+export const DATA_FILE = path.resolve(
+  process.env.DATA_FILE || (process.env.VERCEL ? "/tmp/db.json" : path.join(findRoot(), "data/db.json")),
+);
 
 const DATE_KEYS = new Set(["lastAsked", "createdAt", "updatedAt", "expiresAt", "accessTokenExpiresAt", "refreshTokenExpiresAt"]);
 
@@ -99,7 +107,10 @@ function readFile(): Partial<Data> | null {
 
 // ───────────── MySQL (used when database settings are in the environment) ─────────────
 
-type MysqlConfig = { host: string; port: number; user: string; password: string; database: string };
+type MysqlConfig = { host: string; port: number; user: string; password: string; database: string; ssl?: { rejectUnauthorized: boolean } };
+
+/** DB_SSL=true for cloud MySQL that needs a secure connection (Aiven, TiDB Cloud, etc.). */
+const sslOpt = () => (/^(1|true|yes)$/i.test(process.env.DB_SSL ?? "") ? { ssl: { rejectUnauthorized: true } } : {});
 
 function mysqlConfig(): MysqlConfig | null {
   const url = process.env.DATABASE_URL;
@@ -111,11 +122,12 @@ function mysqlConfig(): MysqlConfig | null {
       user: decodeURIComponent(u.username),
       password: decodeURIComponent(u.password),
       database: decodeURIComponent(u.pathname.replace(/^\//, "")),
+      ...sslOpt(),
     };
   }
   const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
   if (DB_USER && DB_NAME) {
-    return { host: DB_HOST || "localhost", port: Number(DB_PORT || 3306), user: DB_USER, password: DB_PASSWORD ?? "", database: DB_NAME };
+    return { host: DB_HOST || "localhost", port: Number(DB_PORT || 3306), user: DB_USER, password: DB_PASSWORD ?? "", database: DB_NAME, ...sslOpt() };
   }
   return null;
 }
@@ -194,6 +206,18 @@ export function initStore(): Promise<void> {
   return g.__storeReady;
 }
 
+/**
+ * Serverless (Vercel): several copies of the site can run at once, so re-read the
+ * latest saved data from MySQL at the start of every request.
+ */
+export async function refreshStore(): Promise<void> {
+  await initStore();
+  if (STORAGE !== "mysql" || !pool) return;
+  await writing; // finish our own pending save first
+  const [rows] = (await pool.query(`SELECT doc FROM ${TABLE} WHERE id = ?`, [ROW_ID])) as [{ doc: string }[], unknown];
+  if (rows.length) fill(data, JSON.parse(rows[0].doc) as Partial<Data>);
+}
+
 /** Save the in-memory data (MySQL or file). Call after every change. */
 export function save() {
   if (STORAGE === "mysql") return mysqlSave();
@@ -201,4 +225,65 @@ export function save() {
   const tmp = `${DATA_FILE}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
   fs.renameSync(tmp, DATA_FILE);
+}
+
+// ───────────── Uploaded images (blog, gallery, packages) ─────────────
+// Kept outside the main data so pages stay fast: MySQL table `site_images`,
+// or files in <data folder>/uploads when there is no database.
+
+const UPLOADS = path.join(path.dirname(DATA_FILE), "uploads");
+let imagesTableReady = false;
+
+async function imagesTable() {
+  if (!pool) throw new Error("Database not connected");
+  if (!imagesTableReady) {
+    await pool.query(
+      `CREATE TABLE IF NOT EXISTS site_images (id VARCHAR(40) PRIMARY KEY, mime VARCHAR(40) NOT NULL, data LONGBLOB NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`,
+    );
+    imagesTableReady = true;
+  }
+  return pool;
+}
+
+const EXT: Record<string, string> = { "image/webp": "webp", "image/jpeg": "jpg", "image/png": "png", "image/gif": "gif" };
+const MIME = Object.fromEntries(Object.entries(EXT).map(([m, e]) => [e, m]));
+
+/** Save an uploaded image; returns its file name (id.ext). */
+export async function saveImage(bytes: Buffer, mime: string): Promise<string> {
+  const ext = EXT[mime];
+  if (!ext) throw new Error("Unsupported image type");
+  const name = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  await initStore();
+  if (STORAGE === "mysql") {
+    const db = await imagesTable();
+    await db.query(`INSERT INTO site_images (id, mime, data) VALUES (?, ?, ?)`, [name, mime, bytes]);
+  } else {
+    fs.mkdirSync(UPLOADS, { recursive: true });
+    fs.writeFileSync(path.join(UPLOADS, name), bytes);
+  }
+  return name;
+}
+
+export async function readImage(name: string): Promise<{ bytes: Buffer; mime: string } | null> {
+  if (!/^[a-z0-9]+\.(webp|jpg|png|gif)$/.test(name)) return null;
+  await initStore();
+  if (STORAGE === "mysql") {
+    const db = await imagesTable();
+    const [rows] = (await db.query(`SELECT mime, data FROM site_images WHERE id = ?`, [name])) as [{ mime: string; data: Buffer }[], unknown];
+    return rows.length ? { bytes: Buffer.from(rows[0].data), mime: rows[0].mime } : null;
+  }
+  const file = path.join(UPLOADS, name);
+  if (!fs.existsSync(file)) return null;
+  return { bytes: fs.readFileSync(file), mime: MIME[name.split(".").pop()!] ?? "application/octet-stream" };
+}
+
+export async function deleteImage(name: string): Promise<void> {
+  if (!/^[a-z0-9]+\.(webp|jpg|png|gif)$/.test(name)) return;
+  await initStore();
+  if (STORAGE === "mysql") {
+    const db = await imagesTable();
+    await db.query(`DELETE FROM site_images WHERE id = ?`, [name]);
+  } else {
+    fs.rmSync(path.join(UPLOADS, name), { force: true });
+  }
 }

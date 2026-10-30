@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CheckCircle2, ChevronDown, Loader2, Phone, User, Briefcase } from "lucide-react";
 import { CATEGORIES } from "../lib/site";
 import { useCreateLead } from "../queries/leads";
+import { useContent } from "../queries/content";
 
 type Props = {
   layout?: "row" | "stack";
@@ -24,6 +25,9 @@ export function LeadForm({
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [service, setService] = useState(defaultService);
+  const packages = useContent().packages;
+  const known = (s: string) =>
+    s === "Not sure / Other" || CATEGORIES.some((c) => c.services.some((x) => x.name === s)) || packages.some((p) => `${p.name} package` === s);
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const create = useCreateLead();
@@ -97,6 +101,20 @@ export function LeadForm({
                 ))}
               </optgroup>
             ))}
+            {packages.length > 0 && (
+              <optgroup label="Packages">
+                {packages.map((p) => (
+                  <option key={p.id} value={`${p.name} package`} className="text-navy">
+                    {p.name} package
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {service && !known(service) && (
+              <option value={service} className="text-navy">
+                {service}
+              </option>
+            )}
             <option value="Not sure / Other" className="text-navy">
               Not sure / Other
             </option>
