@@ -5,6 +5,7 @@
  * with sensible automatic defaults.
  */
 import { serviceUrl, slugify, type Category, type Service } from "./site";
+import { serviceFaqs } from "./service-faqs";
 import type { SiteSettings } from "../../api/lib/site-schema";
 import type { PostSummary, PublicContent } from "../../api/lib/content-schema";
 
@@ -128,6 +129,7 @@ function categoryPage(origin: string, ctx: SeoCtx, c: Category): PageSeo {
     image: c.image,
     priority: 0.8,
     jsonLd: [
+      webPage(origin, `/services/${c.slug}`, c.title, c.intro, undefined, "CollectionPage"),
       crumbs(origin, [
         { name: "Home", path: "/" },
         { name: c.title, path: `/services/${c.slug}` },
@@ -159,13 +161,33 @@ function servicePage(origin: string, ctx: SeoCtx, c: Category, s: Service, dup: 
         { name: c.title, path: `/services/${c.slug}` },
         { name: s.name, path: serviceUrl(c.slug, s.name) },
       ]),
+      webPage(origin, serviceUrl(c.slug, s.name), s.name, s.text, `${abs(origin, serviceUrl(c.slug, s.name))}#service`),
       {
         "@context": "https://schema.org",
         "@type": ex ? "Course" : "Service",
+        "@id": `${abs(origin, serviceUrl(c.slug, s.name))}#service`,
         name: s.name,
         description: s.text,
+        ...(c.image ? { image: abs(origin, c.image) } : {}),
         provider: { "@id": abs(origin, "/#business") },
-        ...(ex ? {} : { serviceType: c.title, areaServed: { "@type": "City", name: city } }),
+        ...(ex
+          ? { educationalLevel: "Beginner", inLanguage: "en", ...(s.days ? { timeRequired: s.days } : {}) }
+          : {
+              serviceType: s.name,
+              category: c.title,
+              areaServed: [{ "@type": "City", name: city }, { "@type": "Country", name: "India" }],
+              audience: { "@type": "Audience", audienceType: (s.who ?? c.who).join(", ") },
+              availableChannel: {
+                "@type": "ServiceChannel",
+                serviceUrl: abs(origin, serviceUrl(c.slug, s.name)),
+                servicePhone: { "@type": "ContactPoint", telephone: ctx.site.phone.replace(/\s+/g, ""), contactType: "customer service" },
+              },
+              hasOfferCatalog: {
+                "@type": "OfferCatalog",
+                name: "What you get",
+                itemListElement: (s.includes ?? c.includes).map((x) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: x } })),
+              },
+            }),
         ...(pk.length
           ? {
               offers: pk.map((p) => ({
@@ -177,7 +199,28 @@ function servicePage(origin: string, ctx: SeoCtx, c: Category, s: Service, dup: 
           : {}),
         url: abs(origin, serviceUrl(c.slug, s.name)),
       },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: serviceFaqs(c, s).map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      },
     ],
+  };
+}
+
+/** The page itself, linked to the business and the website. */
+function webPage(origin: string, path: string, name: string, description: string, mainEntity?: string, type = "WebPage") {
+  return {
+    "@context": "https://schema.org",
+    "@type": type,
+    "@id": `${abs(origin, path)}#webpage`,
+    url: abs(origin, path),
+    name,
+    description,
+    inLanguage: "en-IN",
+    isPartOf: { "@id": abs(origin, "/#website") },
+    about: { "@id": abs(origin, "/#business") },
+    ...(mainEntity ? { mainEntity: { "@id": mainEntity } } : {}),
   };
 }
 
@@ -218,6 +261,7 @@ function postPage(origin: string, ctx: SeoCtx, p: PostSummary): PageSeo {
         ...(p.tags.length ? { keywords: p.tags.join(", ") } : {}),
         ...(p.category ? { articleSection: p.category } : {}),
       },
+      ...customLd(p.schema ?? ""),
     ],
   };
 }
@@ -250,6 +294,7 @@ export function allPages(origin: string, ctx: SeoCtx): PageSeo[] {
     description: clip(`${brand}, ${city}: ${categories.map((c) => c.title.toLowerCase()).join(", ")}. Free consultation — call ${site.phone}.`),
     priority: 1,
     jsonLd: [
+      webPage(origin, "/", brand, site.tagline || brand),
       business(origin, ctx),
       { "@context": "https://schema.org", "@type": "WebSite", "@id": abs(origin, "/#website"), name: brand, url: abs(origin, "/"), inLanguage: "en-IN" },
       ...(content.faqs.length
@@ -352,7 +397,7 @@ export function allPages(origin: string, ctx: SeoCtx): PageSeo[] {
   return pages.map((p) => {
     const o = own[p.path];
     if (!o) return p;
-    return { ...p, title: o.title || p.title, description: o.description || p.description, image: o.image || p.image };
+    return { ...p, title: o.title || p.title, description: o.description || p.description, image: o.image || p.image, jsonLd: [...p.jsonLd, ...customLd(o.schema ?? "")] };
   });
 }
 

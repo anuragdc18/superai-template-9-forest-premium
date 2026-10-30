@@ -31,10 +31,27 @@ export const hoursSchema = z.object({
   closes: z.string().regex(/^\d{2}:\d{2}$/, "Use time like 18:00"),
 });
 
+/** Structured data (JSON-LD) typed by the owner: empty, or valid JSON (one object or a list). */
+export const jsonLdText = (label = "Structured data") =>
+  z
+    .string()
+    .max(20_000)
+    .refine((s) => {
+      if (!s.trim()) return true;
+      try {
+        const v = JSON.parse(s);
+        return typeof v === "object" && v !== null;
+      } catch {
+        return false;
+      }
+    }, `${label} must be valid JSON`);
+
 export const pageSeoSchema = z.object({
   title: txt(80),
   description: txt(200),
   image: txt(300),
+  /** Extra structured data (JSON-LD) for this page only. */
+  schema: jsonLdText("Page structured data").optional(),
 });
 
 export const seoSchema = z.object({
@@ -58,18 +75,7 @@ export const seoSchema = z.object({
   gaId: z.string().trim().regex(/^$|^G-[A-Z0-9]+$/i, "Google Analytics ID looks like G-XXXXXXXXXX"),
   searchConsole: txt(120),
   /** Advanced: extra structured data (JSON-LD) added to the home page, as written. */
-  customJsonLd: z
-    .string()
-    .max(20_000)
-    .refine((s) => {
-      if (!s.trim()) return true;
-      try {
-        const v = JSON.parse(s);
-        return typeof v === "object" && v !== null;
-      } catch {
-        return false;
-      }
-    }, "Extra structured data must be valid JSON"),
+  customJsonLd: jsonLdText("Extra structured data"),
   /** Your own title / description / share image per page, keyed by path ("/", "/contact" …). */
   pages: z.record(z.string(), pageSeoSchema),
 });
@@ -110,6 +116,8 @@ export const postSchema = z.object({
   seoTitle: txt(80),
   seoDescription: txt(200),
   ogImage: txt(300),
+  /** Extra structured data (JSON-LD) for this post only. */
+  schema: jsonLdText("Post structured data").optional(),
   /** Link to a service page for the "Get Free Consultation" box (optional). */
   service: txt(160),
 });

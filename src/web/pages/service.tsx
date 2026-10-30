@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 import { findService, serviceUrl, slugify, waLink } from "../lib/site";
+import { serviceFaqs } from "../lib/service-faqs";
 import { LeadForm } from "../components/lead-form";
 import { WaIcon } from "../components/header";
 import { telHref, useSite } from "../queries/site";
@@ -108,18 +109,7 @@ export default function ServicePage() {
   const includes = service.includes ?? cat.includes;
   const docs = service.docs ?? cat.docs;
   const related = cat.services.filter((s) => s.name !== service.name).slice(0, 4);
-  const isCert = cat.slug === "microsoft-certifications";
-  const faqs = [
-    ...(isCert ? [] : [{
-      q: `How long does ${service.name} take?`,
-      a: service.days
-        ? `Usually ${service.days}. We tell you the exact timeline on the free call.`
-        : "It depends on your needs. We give you a clear timeline on the free call.",
-    }]),
-    { q: "How much does it cost?", a: "The price depends on your needs. Our expert shares a clear price on the free call — no hidden charges." },
-    { q: "Do I need to visit your office?", a: "No. Everything is done online — on phone and WhatsApp — from anywhere in India." },
-    { q: "Will you help after the work is done?", a: "Yes. You can call or WhatsApp us any time if you have questions later." },
-  ];
+  const faqs = serviceFaqs(cat, service);
 
   return (
     <>

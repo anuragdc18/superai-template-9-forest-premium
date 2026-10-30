@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Loader2, X } from "lucide-react";
 import { AdminLayout, Card, Field } from "./layout";
 import { ImagePicker, errorText, input } from "./ui";
 import { RichEditor } from "./rich-editor";
+import { SchemaBox } from "./schema-box";
 import { client } from "../../lib/api";
 import { CATEGORIES, serviceUrl } from "../../lib/site";
 import { SITE_ORIGIN } from "../../components/seo-head";
@@ -31,6 +32,7 @@ const blank = (): Post => {
     seoTitle: "",
     seoDescription: "",
     ogImage: "",
+    schema: "",
     service: "",
   };
 };
@@ -169,6 +171,19 @@ export default function BlogEditPage() {
                   <p className="mt-1 line-clamp-2 text-[13.5px] text-[#4d5156]">{desc}</p>
                 </div>
                 <ImagePicker label="Share image (optional)" aspect="aspect-[1200/630]" value={post.ogImage} onChange={(url) => set({ ogImage: url })} hint="Default: the featured image." />
+              </div>
+              <div className="lg:col-span-2">
+                <SchemaBox
+                  value={post.schema ?? ""}
+                  onChange={(schema) => set({ schema })}
+                  url={`${SITE_ORIGIN}/blog/${post.slug}`}
+                  title={post.title}
+                  description={desc}
+                  image={post.ogImage || post.image}
+                  brand={site.siteName}
+                  origin={SITE_ORIGIN}
+                />
+                <p className="mt-1 text-[12.5px] text-slate-500">Every post already gets Article (BlogPosting) and breadcrumb data automatically — add more here only if needed (e.g. FAQ or How-to).</p>
               </div>
             </div>
           </Card>

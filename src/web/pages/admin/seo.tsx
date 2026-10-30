@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, Loader2, Plus, Search, Trash2 } from "lucide-react";
 import { AdminLayout, Card, Field } from "./layout";
 import { ImagePicker, SaveRow, input, useEditable } from "./ui";
+import { SchemaBox } from "./schema-box";
 import { client } from "../../lib/api";
 import { CATEGORIES } from "../../lib/site";
 import { allPages, type SeoCtx } from "../../lib/seo";
@@ -47,7 +48,7 @@ export default function SeoPage() {
       client.content.saveSeo({
         ...v,
         sameAs: v.sameAs.filter((s) => s.trim()),
-        pages: Object.fromEntries(Object.entries(v.pages).filter(([, p]) => p.title.trim() || p.description.trim() || p.image)),
+        pages: Object.fromEntries(Object.entries(v.pages).filter(([, p]) => p.title.trim() || p.description.trim() || p.image || p.schema?.trim())),
       }),
     ),
   );
@@ -190,7 +191,7 @@ export default function SeoPage() {
             </Card>
           </div>
 
-          <Card title="Page titles & descriptions" subtitle="Every page already has an automatic title and description. Type your own to replace them. Blog posts have their own SEO inside the post editor." bodyClass="">
+          <Card title="Page titles, descriptions & schema" subtitle="Every page already has an automatic title, description and structured data. Open a page to type your own or add schema for that page only. Blog posts have these inside the post editor." bodyClass="">
             <div className="border-b border-slate-100 p-4">
               <label className="relative block">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -199,9 +200,10 @@ export default function SeoPage() {
             </div>
             <div className="divide-y divide-slate-100">
               {shown.map((p) => {
-                const own = v.pages[p.path] ?? { title: "", description: "", image: "" };
+                const own = v.pages[p.path] ?? { title: "", description: "", image: "", schema: "" };
                 const setOwn = (x: Partial<typeof own>) => set({ pages: { ...v.pages, [p.path]: { ...own, ...x } } });
                 const custom = !!(own.title || own.description || own.image);
+                const hasSchema = !!own.schema?.trim();
                 const isOpen = openPage === p.path;
                 return (
                   <div key={p.path}>
@@ -210,6 +212,7 @@ export default function SeoPage() {
                         <span className="block truncate text-[14px] font-semibold text-slate-700">{own.title || p.title}</span>
                         <span className="block truncate text-[12.5px] text-slate-400">{p.path}</span>
                       </span>
+                      {hasSchema && <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11.5px] font-semibold text-violet-700">Schema</span>}
                       {custom && <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[11.5px] font-semibold text-blue-700">Custom</span>}
                       <ChevronDown className={`h-4 w-4 text-slate-400 transition ${isOpen ? "rotate-180" : ""}`} />
                     </button>
@@ -229,6 +232,19 @@ export default function SeoPage() {
                           <span className="text-[13.5px] font-semibold text-slate-700">Google preview</span>
                           <GooglePreview url={SITE_ORIGIN.replace(/^https?:\/\//, "") + p.path} title={own.title || p.title} description={own.description || p.description} />
                           <ImagePicker label="Share image (WhatsApp / Facebook)" aspect="aspect-[1200/630]" value={own.image} onChange={(url) => setOwn({ image: url })} />
+                        </div>
+                        <div className="lg:col-span-2">
+                          <SchemaBox
+                            value={own.schema ?? ""}
+                            onChange={(schema) => setOwn({ schema })}
+                            url={SITE_ORIGIN + (p.path === "/" ? "/" : p.path)}
+                            title={own.title || p.title}
+                            description={own.description || p.description}
+                            image={own.image || p.image || ""}
+                            brand={site.siteName}
+                            origin={SITE_ORIGIN}
+                            auto={p.jsonLd}
+                          />
                         </div>
                       </div>
                     )}
