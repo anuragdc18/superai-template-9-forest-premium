@@ -59,7 +59,7 @@ export const siteSchema = z.object({
   logo: z
     .string()
     .max(700_000, "Logo is too large (max ~500 KB)")
-    .refine((v) => v === "" || v.startsWith("data:image/"), "Logo must be an image"),
+    .refine((v) => v === "" || v.startsWith("data:image/") || /^\/[\w\-./]+\.(png|jpe?g|webp|svg|gif)$/i.test(v), "Logo must be an image"),
   logoHeight: z.number().int().min(20).max(80),
   colors: z.object({ navy: hex, royal: hex, brand: hex }),
   // primary contact (used across the website)
