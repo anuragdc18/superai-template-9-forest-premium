@@ -89,6 +89,36 @@ function defaultPort(): number {
 }
 const port = Number(process.env.PORT || defaultPort());
 await initStore().catch((err) => console.error("Data could not be loaded yet — will retry on first request.", err));
-createServer(getRequestListener(handle)).listen(port, () => {
+/**
+ * Idle shut-down (Hostinger / LiteSpeed only). LiteSpeed starts a separate copy of the site for every
+ * address it is reached at (domain, www, temporary domain) and for bursts of visitors, and keeps them
+ * running. Each copy exits after IDLE_EXIT_MINUTES with no requests; LiteSpeed starts it again on the
+ * next visit (~1–2 s). Set IDLE_EXIT_MINUTES=0 to turn this off. Never active for `npm start` / a VPS.
+ */
+const underLiteSpeed = /lsnode/i.test(process.title) || process.argv.some((a) => /lsnode/i.test(a));
+const idleMinutes = Number(process.env.IDLE_EXIT_MINUTES ?? (underLiteSpeed ? 15 : 0)) || 0;
+let inFlight = 0;
+let lastActivity = Date.now();
+const listener = getRequestListener(async (request: Request) => {
+  inFlight++;
+  lastActivity = Date.now();
+  try {
+    return await handle(request);
+  } finally {
+    inFlight--;
+    lastActivity = Date.now();
+  }
+});
+const server = createServer(listener);
+if (idleMinutes > 0) {
+  setInterval(() => {
+    if (inFlight === 0 && Date.now() - lastActivity > idleMinutes * 60_000) {
+      console.log(`No visitors for ${idleMinutes} min — stopping this copy to save resources (it restarts on the next visit).`);
+      server.close();
+      process.exit(0);
+    }
+  }, 30_000).unref();
+}
+server.listen(port, () => {
   console.log(`Website running on port ${port} · data: ${STORAGE === "mysql" ? "MySQL database" : DATA_FILE}`);
 });
