@@ -129,42 +129,14 @@ details filled in; the admin panel is hidden. GitHub Pages has no server, so lea
 the real hosting (Hostinger). Turn it on with `enable-github-pages.ps1`
 (Settings → Pages → Source: **GitHub Actions**). Free GitHub accounts need the repository to be public.
 
-## Deploy on Vercel
-
-Vercel runs the website and the API (admin, leads, chatbot) — but it **cannot store files**, so it needs a **MySQL database** (for example the one in your Hostinger plan).
-
-1. **Database (Hostinger):** hPanel → Databases → create a MySQL database + user.
-   Then hPanel → Databases → **Remote MySQL** → add host `%` (any host) for that database, so Vercel can connect.
-   Note the **host name** shown there (looks like `srv123.hstgr.io` or an IP address).
-2. **Vercel:** Add New → Project → import this GitHub repo. Leave Framework = Other; `vercel.json` sets the build.
-3. **Environment Variables** (Vercel → Project → Settings → Environment Variables):
-
-   | Name | Value |
-   |---|---|
-   | `DB_HOST` | the remote MySQL host from step 1 |
-   | `DB_PORT` | `3306` |
-   | `DB_NAME` | database name |
-   | `DB_USER` | database user |
-   | `DB_PASSWORD` | database password |
-   | `BETTER_AUTH_SECRET` | a long random string (40+ characters) |
-   | `WEBSITE_URL` | your site address, e.g. `https://your-project.vercel.app` (or your domain) |
-
-   Cloud MySQL that needs a secure connection (Aiven, TiDB Cloud…): also add `DB_SSL` = `true`.
-4. **Deploy.** Then open `/admin` (admin / Welcome@123!!!) and **change the password** in Admin → Account.
-5. Custom domain: Vercel → Settings → Domains. Update `WEBSITE_URL` to the domain and redeploy.
-
-**Forgot the admin password?** Add `ADMIN_PASSWORD` (8+ characters) in the environment variables, redeploy, log in with it, then remove the variable.
-
-Without the DB_* settings the site still opens, but leads and admin changes are lost — always add the database.
-
 ## SEO, sitemap & Google Analytics
 
-Built in — every `npm run build` / Vercel build creates:
+Built in — every `npm run build` creates:
 
 - a ready-made page head for **all 160 pages** (title, description, canonical link, WhatsApp/Facebook preview, Google structured data: business, founder, services, breadcrumbs)
 - `/sitemap.xml` and `/robots.txt`
 
-Settings (Vercel / Hostinger → Environment Variables, then redeploy):
+Settings (Hostinger → Environment Variables, then redeploy):
 
 | Name | Value |
 |---|---|
