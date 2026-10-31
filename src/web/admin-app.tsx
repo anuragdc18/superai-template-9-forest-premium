@@ -16,6 +16,7 @@ import ServicesAdminPage from "./pages/admin/services";
 import SeoAdminPage from "./pages/admin/seo";
 import WhatsappAdminPage from "./pages/admin/whatsapp";
 import ImagesAdminPage from "./pages/admin/images";
+import PreviewPage from "./pages/admin/preview";
 
 /** Admin panel — its own interface, no website header/footer. */
 export default function AdminApp() {
@@ -38,6 +39,7 @@ export default function AdminApp() {
       <Route path="/admin/seo" component={SeoAdminPage} />
       <Route path="/admin/whatsapp" component={WhatsappAdminPage} />
       <Route path="/admin/images" component={ImagesAdminPage} />
+      <Route path="/admin/preview" component={PreviewPage} />
       <Route>
         <Redirect to="/admin/dashboard" replace />
       </Route>

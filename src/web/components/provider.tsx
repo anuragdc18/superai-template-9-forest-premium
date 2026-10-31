@@ -1,4 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { startPreviewBridge } from "../lib/preview-draft";
+
+// inside the admin's live-preview frame only: receive unsaved changes to show
+startPreviewBridge();
 
 const queryClient = new QueryClient();
 

@@ -3,7 +3,7 @@
  * social preview, structured data and Google Analytics — straight from the admin settings.
  * Also builds /sitemap.xml and /robots.txt. Used by the Node server (Hostinger) and Vercel.
  */
-import { CATEGORIES, serviceUrl, slugify } from "../web/lib/site";
+import { CATEGORIES, OLD_SERVICE_NAMES, serviceUrl, slugify } from "../web/lib/site";
 import { applyServiceEdits } from "../web/lib/services-edit";
 import { allPages, headTags, seoFor, type SeoCtx } from "../web/lib/seo";
 import { publicContent } from "./lib/content-schema";
@@ -37,7 +37,15 @@ function renamedServiceUrl(pathname: string, ctx: SeoCtx): string | null {
   const m = pathname.match(/^\/services\/([^/]+)\/([^/]+)\/?$/);
   if (!m) return null;
   const e = ctx.content.services.find((x) => x.cat === m[1] && x.original && slugify(x.original) === m[2] && !x.hidden && x.name !== x.original);
-  return e ? serviceUrl(e.cat, e.name) : null;
+  if (e) return serviceUrl(e.cat, e.name);
+  // services renamed in the code (full catalogue update)
+  const cat = ctx.categories.find((c) => c.slug === m[1]);
+  const old = Object.keys(OLD_SERVICE_NAMES).find((o) => slugify(o) === m[2]);
+  if (cat && old && !cat.services.some((s) => slugify(s.name) === m[2])) {
+    const now = cat.services.find((s) => s.name === OLD_SERVICE_NAMES[old]);
+    if (now) return serviceUrl(cat.slug, now.name);
+  }
+  return null;
 }
 
 /** The website page (index.html) with the right head for this path. */

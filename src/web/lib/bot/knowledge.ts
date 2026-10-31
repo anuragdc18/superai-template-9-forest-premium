@@ -103,7 +103,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Company Registration (Pvt Ltd)": {
+  "Private Limited Registration": {
     aliases: ["pvtltd", "private company", "company registration", "company register", "register a company", "company", "incorporation", "incorporate", "startup registration", "register company", "register my company", "opc"],
     faqs: [
       {
@@ -145,7 +145,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Proprietorship / Firm Registration": {
+  "Firm Registration": {
     aliases: ["proprietorship", "sole proprietor", "proprietor", "firm registration", "own business", "single owner", "firm"],
     faqs: [
       {
@@ -154,7 +154,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "MSME / Udyam": {
+  "Udyam / MSME Registration": {
     aliases: ["msme", "udyam registration", "msme certificate", "small business registration", "ssi"],
     faqs: [
       {
@@ -171,7 +171,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  Trademark: {
+  "Trademark Registration": {
     aliases: ["trademark", "brand registration", "logo registration", "protect brand", "protect my brand", "protect name", "brand name protection", "copyright", "registered symbol", "copy my brand", "copy my name", "copy my logo", "copying my brand", "brand copy"],
     faqs: [
       {
@@ -200,7 +200,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "FSSAI (Food License)": {
+  "FSSAI Registration": {
     aliases: ["fssai", "food registration", "food business", "restaurant license", "cloud kitchen", "food", "home kitchen", "bakery"],
     faqs: [
       {
@@ -217,7 +217,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Import Export Code (IEC)": {
+  "IEC Registration": {
     aliases: ["iec", "iec code", "import", "export", "exporter", "importer", "dgft"],
     faqs: [
       {
@@ -232,7 +232,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
   },
   "Trade License": { aliases: ["trade license", "tradelicense", "municipal license", "ghmc", "shop license"], days: "7–15 days" },
   "Shop & Establishment": { aliases: ["shopact", "shop establishment", "labour license", "shop registration"] },
-  "ISO Certification": {
+  "ISO Registration": {
     aliases: ["iso", "iso 9001", "iso certificate", "quality certificate", "iso 27001", "iso 14001"],
     faqs: [
       {
@@ -241,7 +241,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "GST & Income Tax Filing": {
+  "GST Filings": {
     aliases: ["gstfiling", "itr", "tax filing", "income tax", "tax return", "returns", "file return", "file gst", "accounting", "bookkeeping", "ca"],
     faqs: [
       {
@@ -254,8 +254,8 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "TDS, PF & ESIC Filing": { aliases: ["tds", "pf", "esic", "esi", "provident fund", "payroll", "salary compliance"] },
-  "Company Yearly Compliance": { aliases: ["roc", "annual compliance", "annual return", "aoc 4", "mgt 7", "dir 3 kyc", "director kyc", "yearly compliance"] },
+  "TDS Filing": { aliases: ["tds", "pf", "esic", "esi", "provident fund", "payroll", "salary compliance"] },
+  "Annual Returns Filings": { aliases: ["roc", "annual compliance", "annual return", "aoc 4", "mgt 7", "dir 3 kyc", "director kyc", "yearly compliance"] },
 
   "Logo Design": {
     aliases: ["logo", "logo design", "logo making", "brand logo", "new logo", "logo banana", "design logo"],
@@ -280,28 +280,28 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
     ],
   },
   "Business Card": { aliases: ["businesscard", "visiting card", "card design"], days: "2–3 days" },
-  Letterhead: { aliases: ["letterhead", "letter head", "letter pad"], days: "2–3 days" },
-  "Brand Name & Tagline": { aliases: ["brand name", "business name", "name suggestion", "tagline", "slogan", "naming"], days: "3–5 days" },
+  "Letter Head": { aliases: ["letterhead", "letter head", "letter pad"], days: "2–3 days" },
+  "Brand Naming": { aliases: ["brand name", "business name", "name suggestion", "tagline", "slogan", "naming"], days: "3–5 days" },
   "Company Profile": { aliases: ["company profile", "business profile", "profile document"], days: "5–7 days" },
-  "Full Brand Kit": { aliases: ["brand kit", "brand identity", "branding kit", "brand guidelines", "style guide"], days: "7–10 days" },
+  "Brand Guidelines": { aliases: ["brand kit", "brand identity", "branding kit", "brand guidelines", "style guide"], days: "7–10 days" },
   Rebranding: { aliases: ["rebrand", "rebranding", "new look", "refresh brand"], days: "2–3 weeks" },
-  "ID Cards & Stamps": { aliases: ["id card", "stamp", "rubber stamp", "seal"], days: "2–3 days" },
-  "T-Shirt & Merchandise": { aliases: ["tshirt", "t shirt", "merchandise", "merch", "cap", "mug"], days: "5–7 days" },
-  "Email Signature": { aliases: ["email signature", "signature"], days: "1–2 days" },
+  "Stamp Design": { aliases: ["id card", "stamp", "rubber stamp", "seal"], days: "2–3 days" },
+  "T-Shirt Design": { aliases: ["tshirt", "t shirt", "merchandise", "merch", "cap", "mug"], days: "5–7 days" },
+  "Email Signature Design": { aliases: ["email signature", "signature"], days: "1–2 days" },
 
-  Brochure: { aliases: ["brochure", "pamphlet", "leaflet"], days: "3–5 days" },
-  "Flyer & Poster": { aliases: ["flyer", "flier", "poster", "handbill"], days: "2–3 days" },
-  Packaging: { aliases: ["packaging", "box design", "label", "label design", "pouch"], days: "5–7 days" },
-  "Flex & Hoarding": { aliases: ["flex", "hoarding", "banner", "billboard", "signboard", "standee"], days: "2–3 days" },
-  "Menu Card": { aliases: ["menu", "menu card", "restaurant menu"], days: "2–4 days" },
-  "Certificates & ID Cards": { aliases: ["certificate design", "award", "certificates"], days: "2–3 days" },
-  Catalogue: { aliases: ["catalogue", "catalog", "product catalogue"], days: "5–10 days" },
-  "Presentation (PPT)": { aliases: ["presentation", "pitch deck", "slides", "deck"], days: "3–5 days" },
+  "Brochure Design": { aliases: ["brochure", "pamphlet", "leaflet"], days: "3–5 days" },
+  "Flyer / Posters": { aliases: ["flyer", "flier", "poster", "handbill"], days: "2–3 days" },
+  "Package Designs": { aliases: ["packaging", "box design", "label", "label design", "pouch"], days: "5–7 days" },
+  "Hoarding Designs": { aliases: ["flex", "hoarding", "banner", "billboard", "signboard", "standee"], days: "2–3 days" },
+  "Menu Design": { aliases: ["menu", "menu card", "restaurant menu"], days: "2–4 days" },
+  "Certificate Design": { aliases: ["certificate design", "award", "certificates"], days: "2–3 days" },
+  "Catalog Design": { aliases: ["catalogue", "catalog", "product catalogue"], days: "5–10 days" },
+  "PPT Presentations": { aliases: ["presentation", "pitch deck", "slides", "deck"], days: "3–5 days" },
   "Social Media Post Design": { aliases: ["post design", "creative", "creatives", "social post"], days: "1–2 days" },
-  "YouTube Thumbnail": { aliases: ["thumbnail", "youtube thumbnail"], days: "1 day" },
-  "Newspaper Ad": { aliases: ["newspaper", "newspaper ad", "print ad", "classified"], days: "1–2 days" },
+  "YouTube Thumbnail Design": { aliases: ["thumbnail", "youtube thumbnail"], days: "1 day" },
+  "Print Media Designs": { aliases: ["newspaper", "newspaper ad", "print ad", "classified"], days: "1–2 days" },
 
-  "Instagram & Facebook Handling": {
+  "Social Media Management": {
     aliases: ["instagram", "facebook", "social media handling", "socialmedia management", "page handling", "manage instagram", "social media manager", "smm"],
     days: "Monthly plan",
     faqs: [
@@ -315,7 +315,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Monthly Posts": {
+  "Monthly Content Calendar": {
     aliases: ["monthly posts", "post", "posting", "content calendar", "posts per month"],
     days: "Monthly plan",
     faqs: [
@@ -325,8 +325,8 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Reels Planning": { aliases: ["reel", "reels", "short video", "shorts"], days: "Monthly plan" },
-  "Paid Ads (Boosting)": {
+  "Reel Content Planning": { aliases: ["reel", "reels", "short video", "shorts"], days: "Monthly plan" },
+  "Ads Boosting": {
     aliases: ["ads", "ad", "advertising", "boost", "boosting", "meta ads", "facebook ads", "instagram ads", "google ads", "marketing", "promotion", "leads generation", "lead generation"],
     faqs: [
       {
@@ -336,10 +336,10 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
     ],
   },
   "Promo Videos": { aliases: ["video", "promo video", "video editing", "ad video", "status video"], days: "3–5 days" },
-  "Captions & Hashtags": { aliases: ["caption", "captions", "hashtag", "hashtags"] },
-  "Profile Setup": { aliases: ["profile setup", "bio", "highlights", "page setup", "create page"], days: "1–2 days" },
+  "Caption Writing": { aliases: ["caption", "captions", "hashtag", "hashtags"] },
+  "Cover Designs": { aliases: ["profile setup", "bio", "highlights", "page setup", "create page"], days: "1–2 days" },
 
-  "Business Website": {
+  "Responsive Designs": {
     aliases: ["website", "business website", "web design", "web development", "make website", "new website", "company website", "static website", "portfolio website"],
     days: "2–3 weeks",
     faqs: [
@@ -365,7 +365,7 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Online Store": {
+  "Ecommerce Website Development": {
     aliases: ["onlinestore", "ecommerce website", "shopping website", "sell online", "online selling", "shopify", "woocommerce", "store website", "sell my products online", "sell products online", "sell products", "sell my products", "online orders", "take orders online"],
     days: "3–5 weeks",
     faqs: [
@@ -379,15 +379,15 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Landing Page": { aliases: ["landingpage", "single page", "one page website", "campaign page"], days: "5–7 days" },
-  "WordPress Website": { aliases: ["wordpress", "wp website"], days: "2–3 weeks" },
+  "Landing Page Development": { aliases: ["landingpage", "single page", "one page website", "campaign page"], days: "5–7 days" },
+  "WordPress Website Development": { aliases: ["wordpress", "wp website"], days: "2–3 weeks" },
   "Website Redesign": { aliases: ["redesign", "old website", "website update", "revamp", "modernise", "modernize"], days: "2–3 weeks" },
-  "Domain & Hosting": {
+  "Domain and Hosting Setup": {
     aliases: ["domainhosting", "dot com", "ssl", "business email", "server", "website address"],
     days: "1–2 days",
   },
   "Payment Gateway": { aliases: ["paymentgateway", "accept payments", "upi on website"], days: "3–7 days" },
-  "Google Ranking (SEO)": {
+  "SEO Friendly": {
     aliases: ["seo", "google ranking", "rank on google", "search engine", "google search", "top of google", "google my business", "gmb", "google business profile"],
     days: "Results in 3–6 months",
     faqs: [
@@ -398,9 +398,9 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
     ],
   },
   "Website Maintenance": { aliases: ["maintenance", "website support", "website changes", "backup", "amc"], days: "Monthly" },
-  "Speed Improvement": { aliases: ["slow website", "speed", "fast website", "page speed", "loading"], days: "3–7 days" },
+  "Website Speed Optimization": { aliases: ["slow website", "speed", "fast website", "page speed", "loading"], days: "3–7 days" },
 
-  "WhatsApp Auto-Reply": {
+  "WhatsApp AI Reply Setup": {
     aliases: ["whatsapp", "auto reply", "autoreply", "whatsapp bot", "whatsapp business", "whatsapp automation", "whatsapp api", "bulk whatsapp"],
     days: "Ready in 1 week",
     faqs: [
@@ -410,13 +410,13 @@ export const SERVICE_INFO: Record<string, ServiceInfo> = {
       },
     ],
   },
-  "Website Chatbot": { aliases: ["chatbot", "chat bot", "website chatbot", "chatbot for website", "chatbot for my website", "website chat", "live chat"], days: "1–2 weeks" },
-  "Lead Follow-up Automation": { aliases: ["follow up", "followup", "lead follow", "automation", "drip", "reminder messages"], days: "1–2 weeks" },
-  "Appointment Booking Bot": { aliases: ["appointment", "booking", "booking bot", "slot booking", "clinic booking"], days: "1–2 weeks" },
-  "Google Review Replies": { aliases: ["google review", "reviews reply", "review management"], days: "Monthly" },
-  "Google Sheets & CRM Automation": { aliases: ["crm", "google sheets", "sheets", "excel automation", "zoho", "hubspot"], days: "1–2 weeks" },
-  "Custom ChatGPT for Business": { aliases: ["chatgpt", "custom gpt", "gpt", "ai assistant", "ai bot", "llm"], days: "2–3 weeks" },
-  "AI Training for Staff": { aliases: ["ai training", "ai course", "train staff", "ai workshop", "learn ai", "ai class"], days: "1–2 days workshop" },
+  "Website FAQ Chatbot": { aliases: ["chatbot", "chat bot", "website chatbot", "chatbot for website", "chatbot for my website", "website chat", "live chat"], days: "1–2 weeks" },
+  "AI Lead Follow-Up Automation": { aliases: ["follow up", "followup", "lead follow", "automation", "drip", "reminder messages"], days: "1–2 weeks" },
+  "Appointment Booking Chatbot": { aliases: ["appointment", "booking", "booking bot", "slot booking", "clinic booking"], days: "1–2 weeks" },
+  "AI Review Response Generator": { aliases: ["google review", "reviews reply", "review management"], days: "Monthly" },
+  "AI Google Sheets Automation": { aliases: ["crm", "google sheets", "sheets", "excel automation", "zoho", "hubspot"], days: "1–2 weeks" },
+  "Custom GPT Setup": { aliases: ["chatgpt", "custom gpt", "gpt", "ai assistant", "ai bot", "llm"], days: "2–3 weeks" },
+  "AI Staff Training Session": { aliases: ["ai training", "ai course", "train staff", "ai workshop", "learn ai", "ai class"], days: "1–2 days workshop" },
 
   "AB-900: Copilot & Agent Administration Fundamentals": {
     aliases: ["ab900", "copilot", "copilot admin", "agent administration", "microsoft copilot"],
@@ -495,31 +495,31 @@ export const COMPARISONS: Comparison[] = [
     a: ["pvtltd", "private company", "company"],
     b: ["llp"],
     text: "**Pvt Ltd vs LLP — in simple words:**\n\n• **Pvt Ltd** — best if you plan to **raise investment** or grow big. More trusted by banks and investors. More yearly compliance (audit is compulsory).\n• **LLP** — best for **professionals and small partnerships** who don't need investors. Fewer yearly filings, audit only above a limit.\n\n👉 Planning to raise funds → Pvt Ltd. Want low compliance → LLP.",
-    recommend: ["Company Registration (Pvt Ltd)", "LLP Registration"],
+    recommend: ["Private Limited Registration", "LLP Registration"],
   },
   {
     a: ["pvtltd", "private company", "company", "llp"],
     b: ["proprietorship", "proprietor", "sole proprietor", "firm"],
     text: "**Company/LLP vs Proprietorship:**\n\n• **Proprietorship** — quickest and cheapest; you and the business are the same, so your personal assets carry the risk. Good for small shops and solo freelancers.\n• **Pvt Ltd / LLP** — a separate legal entity with **limited liability**, more trust from clients and banks, and easier to add partners or investors.\n\n👉 Just starting small alone → Proprietorship. Want to protect personal assets and grow → Pvt Ltd or LLP.",
-    recommend: ["Proprietorship / Firm Registration", "Company Registration (Pvt Ltd)", "LLP Registration"],
+    recommend: ["Firm Registration", "Private Limited Registration", "LLP Registration"],
   },
   {
     a: ["opc"],
     b: ["pvtltd", "private company"],
     text: "**OPC vs Pvt Ltd:**\n\n• **OPC (One Person Company)** — for a **single founder** who wants limited liability. One director + one nominee.\n• **Pvt Ltd** — needs at least 2 directors, but is better for **adding co-founders and investors** later.\n\n👉 Solo founder now → OPC (can convert later). Have a co-founder → Pvt Ltd.",
-    recommend: ["Company Registration (Pvt Ltd)"],
+    recommend: ["Private Limited Registration"],
   },
   {
     a: ["gst"],
     b: ["msme"],
     text: "**GST vs MSME — they are different things:**\n\n• **GST** — a **tax registration**. Needed to bill GST, sell online or sell across states (or above the turnover limit).\n• **MSME / Udyam** — a **free government recognition** that gives loan, subsidy and payment-protection benefits.\n\n👉 Most businesses benefit from having **both**.",
-    recommend: ["GST Registration", "MSME / Udyam"],
+    recommend: ["GST Registration", "Udyam / MSME Registration"],
   },
   {
     a: ["trademark"],
     b: ["company", "pvtltd", "company name", "gst"],
     text: "**Company registration does NOT protect your brand name.** 🙅\n\nRegistering a company/GST only gives you a legal business. Someone else can still use a similar brand name — only a **Trademark** gives you exclusive rights to your name and logo.\n\n👉 Register the business **and** file a trademark.",
-    recommend: ["Trademark", "Company Registration (Pvt Ltd)"],
+    recommend: ["Trademark Registration", "Private Limited Registration"],
   },
   {
     a: ["az900", "azure fundamentals"],
@@ -531,13 +531,13 @@ export const COMPARISONS: Comparison[] = [
     a: ["business website", "website"],
     b: ["onlinestore", "ecommerce website", "sell online"],
     text: "**Business Website vs Online Store:**\n\n• **Business Website** — shows your business, services and contact details; customers call/WhatsApp you. Ready in 2–3 weeks.\n• **Online Store** — customers **add to cart and pay online** (UPI/cards/COD), with order tracking. Ready in 3–5 weeks.\n\n👉 Selling products directly → Online Store. Getting enquiries → Business Website.",
-    recommend: ["Business Website", "Online Store"],
+    recommend: ["Responsive Designs", "Ecommerce Website Development"],
   },
   {
     a: ["wordpress"],
     b: ["custom", "coded", "react"],
     text: "**WordPress vs Custom website:**\n\n• **WordPress** — easy for you to edit yourself, lots of plugins, quick to build.\n• **Custom** — fastest loading and fully tailored, best for special features.\n\n👉 Most small businesses do great with WordPress. Our expert will suggest the right one.",
-    recommend: ["WordPress Website", "Business Website"],
+    recommend: ["WordPress Website Development", "Responsive Designs"],
   },
 ];
 
@@ -565,14 +565,14 @@ export const FLOWS: Record<string, Flow> = {
             label: "Yes, I want to grow big",
             result: {
               text: "👉 A **Private Limited company** (or **OPC** if you'll stay the only owner for now) is the best fit. It gives limited liability and investors trust it.",
-              services: ["Company Registration (Pvt Ltd)"],
+              services: ["Private Limited Registration"],
             },
           },
           {
             label: "No, keep it simple",
             result: {
               text: "👉 A **Proprietorship** is the simplest and cheapest way to start. We'll set it up with **GST / MSME** registration so you can open a current account and bill customers.",
-              services: ["Proprietorship / Firm Registration", "MSME / Udyam", "GST Registration"],
+              services: ["Firm Registration", "Udyam / MSME Registration", "GST Registration"],
             },
           },
         ],
@@ -584,7 +584,7 @@ export const FLOWS: Record<string, Flow> = {
             label: "Yes, maybe investors",
             result: {
               text: "👉 Go with a **Private Limited company** — it's what investors and banks prefer, and it's easy to add shareholders.",
-              services: ["Company Registration (Pvt Ltd)"],
+              services: ["Private Limited Registration"],
             },
           },
           {
@@ -626,7 +626,7 @@ export const FLOWS: Record<string, Flow> = {
             label: "No, below",
             result: {
               text: "👍 GST is **optional** for you right now. Many businesses still take it to claim tax credit and work with bigger B2B clients. Meanwhile, the free **MSME / Udyam** registration gives you useful benefits.",
-              services: ["MSME / Udyam", "GST Registration"],
+              services: ["Udyam / MSME Registration", "GST Registration"],
             },
           },
           {
@@ -647,10 +647,10 @@ export const FLOWS: Record<string, Flow> = {
       goal: {
         text: "Nice! 💻 What's the main goal for your website?",
         options: [
-          { label: "Show my business & get enquiries", result: { text: "👉 A **Business Website** is perfect — mobile-friendly, with WhatsApp button and enquiry form. Ready in 2–3 weeks.", services: ["Business Website"] } },
-          { label: "Sell products online", result: { text: "👉 You need an **Online Store** — cart, UPI/card payments, COD and order tracking.", services: ["Online Store", "Payment Gateway"] } },
-          { label: "One page for ads/offer", result: { text: "👉 A **Landing Page** is ideal for ads — one clear offer, fast loading, built to get leads.", services: ["Landing Page"] } },
-          { label: "Fix my old website", result: { text: "👉 Our **Website Redesign** makes your old site modern, fast and mobile-friendly.", services: ["Website Redesign", "Speed Improvement"] } },
+          { label: "Show my business & get enquiries", result: { text: "👉 A **Business Website** is perfect — mobile-friendly, with WhatsApp button and enquiry form. Ready in 2–3 weeks.", services: ["Responsive Designs"] } },
+          { label: "Sell products online", result: { text: "👉 You need an **Online Store** — cart, UPI/card payments, COD and order tracking.", services: ["Ecommerce Website Development", "Payment Gateway"] } },
+          { label: "One page for ads/offer", result: { text: "👉 A **Landing Page** is ideal for ads — one clear offer, fast loading, built to get leads.", services: ["Landing Page Development"] } },
+          { label: "Fix my old website", result: { text: "👉 Our **Website Redesign** makes your old site modern, fast and mobile-friendly.", services: ["Website Redesign", "Website Speed Optimization"] } },
         ],
       },
     },

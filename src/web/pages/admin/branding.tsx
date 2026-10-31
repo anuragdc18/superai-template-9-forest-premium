@@ -4,6 +4,7 @@ import { AdminLayout, Card, Field, SaveBar } from "./layout";
 import { ColorPicker } from "../../components/color-picker";
 import { FALLBACK_SITE, type SiteSettings } from "../../queries/site";
 import { useSiteForm } from "./use-site-form";
+import { LivePreview } from "./live-preview";
 
 const COLOR_FIELDS: { key: keyof SiteSettings["colors"]; label: string; hint: string }[] = [
   { key: "navy", label: "Main colour", hint: "Top bar, headings, footer" },
@@ -40,6 +41,7 @@ export default function BrandingPage() {
 
   return (
     <AdminLayout title="Logo & Colours" subtitle="Change how your website looks. Business name, phone and address are in Contact Info.">
+      <LivePreview draft={{ site: form }} path="/">
       <form onSubmit={submit}>
       <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="space-y-6">
@@ -139,6 +141,7 @@ export default function BrandingPage() {
       </div>
       <SaveBar pending={pending} saved={saved} error={error} dirty={dirty} />
       </form>
+      </LivePreview>
     </AdminLayout>
   );
 }

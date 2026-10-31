@@ -74,7 +74,9 @@ let INDEX: IndexEntry[] | null = null;
 function index(): IndexEntry[] {
   if (INDEX) return INDEX;
   INDEX = ALL_SERVICES.map(({ service, cat }) => {
-    const raw = [service.name, service.name.replace(/\(.*?\)/g, " "), ...serviceInfo(service.name).aliases];
+    // short codes in the name (APEDA, FSSAI, MSME…) also identify the service on their own
+    const codes = service.name.match(/\b[A-Z][A-Z0-9]{2,}\b/g) ?? [];
+    const raw = [service.name, service.name.replace(/\(.*?\)/g, " "), ...codes, ...serviceInfo(service.name).aliases];
     const seen = new Set<string>();
     const aliases: Alias[] = [];
     for (const r of raw) {
@@ -865,7 +867,7 @@ function chat(ctx: Ctx, out: Out, a: Analysis) {
           : /microsoft exam/.test(a.norm)
             ? "exam"
             : flowFor(strong.length > 1 ? undefined : strong[0], strong.length ? undefined : (a.cat ?? CATEGORIES.find((c) => c.slug === m.lastCat)));
-    if (flow && (strong.length !== 1 || /help me choose/.test(a.norm) || ["Company Registration (Pvt Ltd)", "LLP Registration", "Proprietorship / Firm Registration"].includes(strong[0]) || !!a.cat)) {
+    if (flow && (strong.length !== 1 || /help me choose/.test(a.norm) || ["Private Limited Registration", "LLP Registration", "Firm Registration"].includes(strong[0]) || !!a.cat)) {
       return answerFlowNode(ctx, out, flow, FLOWS[flow].start);
     }
   }

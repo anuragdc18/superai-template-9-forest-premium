@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Loader2, X } from "lucide-react";
 import { AdminLayout, Card, Field } from "./layout";
 import { ImagePicker, errorText, input } from "./ui";
 import { RichEditor } from "./rich-editor";
+import { LivePreview } from "./live-preview";
 import { SchemaBox } from "./schema-box";
 import { client } from "../../lib/api";
 import { CATEGORIES, serviceUrl } from "../../lib/site";
@@ -128,7 +129,9 @@ export default function BlogEditPage() {
         </div>
       }
     >
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+      <LivePreview label="Post preview" path="/blog/__preview__" draft={{ post: { post: { ...post, slug: "__preview__", status: "published" }, related: [] } }}>
+      {(previewOpen) => (
+      <div className={`grid gap-6 ${previewOpen ? "2xl:grid-cols-[1fr_320px]" : "xl:grid-cols-[1fr_360px]"}`}>
         <div className="space-y-6">
           <Card bodyClass="p-5 space-y-4">
             <input aria-label="Post title" className="w-full border-0 text-[26px] font-semibold text-slate-800 outline-none placeholder:text-slate-300" placeholder="Post title" value={post.title} onChange={(e) => set({ title: e.target.value })} />
@@ -277,6 +280,8 @@ export default function BlogEditPage() {
           </Card>
         </div>
       </div>
+      )}
+      </LivePreview>
     </AdminLayout>
   );
 }

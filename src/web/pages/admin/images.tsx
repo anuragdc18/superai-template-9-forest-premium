@@ -1,15 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { ImagePlus, Loader2, RotateCcw } from "lucide-react";
+import { Eye, ImagePlus, Loader2, RotateCcw } from "lucide-react";
 import { AdminLayout, Card } from "./layout";
 import { SaveRow, useEditable } from "./ui";
 import { client } from "../../lib/api";
 import { siteImages, type SiteImage } from "../../lib/site-images";
 import { useAllContent, useContentAction, uploadImage } from "../../queries/content";
+import { CATEGORIES } from "../../lib/site";
+import { assetPath } from "../../lib/demo";
+import { LivePreview } from "./live-preview";
+
+/** Website page where an image is shown (category photos → that services page, others → home). */
+const pageFor = (path: string) => {
+  const c = CATEGORIES.find((x) => assetPath(x.image) === path);
+  return c ? `/services/${c.slug}` : "/";
+};
 
 /** Original file address in this website (works under a sub-folder too). */
 const original = (path: string) => import.meta.env.BASE_URL.replace(/\/$/, "") + path;
 
-function ImageCard({ img, value, onChange }: { img: SiteImage; value?: string; onChange: (url: string | undefined) => void }) {
+function ImageCard({ img, value, onChange, onPreview }: { img: SiteImage; value?: string; onChange: (url: string | undefined) => void; onPreview: () => void }) {
   const ref = useRef<HTMLInputElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -26,6 +35,7 @@ function ImageCard({ img, value, onChange }: { img: SiteImage; value?: string; o
     setBusy(true);
     try {
       onChange(await uploadImage(file, 2000));
+      onPreview();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Upload failed. Is the database connected?");
     } finally {
@@ -53,6 +63,9 @@ function ImageCard({ img, value, onChange }: { img: SiteImage; value?: string; o
           <button type="button" onClick={() => ref.current?.click()} className="flex h-9 items-center gap-1.5 rounded-md bg-blue-600 px-3 text-[13px] font-semibold text-white hover:bg-blue-700">
             <ImagePlus className="h-4 w-4" /> {value ? "Change" : "Replace image"}
           </button>
+          <button type="button" onClick={onPreview} className="flex h-9 items-center gap-1.5 rounded-md border border-slate-200 px-3 text-[13px] font-semibold text-slate-600 hover:bg-slate-50">
+            <Eye className="h-4 w-4" /> See on website
+          </button>
           {value && (
             <button type="button" onClick={() => onChange(undefined)} className="flex h-9 items-center gap-1.5 rounded-md border border-slate-200 px-3 text-[13px] font-semibold text-slate-600 hover:bg-slate-50">
               <RotateCcw className="h-4 w-4" /> Use original
@@ -71,12 +84,14 @@ export default function ImagesPage() {
   const ed = useEditable<Record<string, string>>(data?.images, (v) => act(() => client.content.saveImages(v)));
   const list = siteImages();
   const groups = Array.from(new Set(list.map((x) => x.group)));
+  const [previewPath, setPreviewPath] = useState("/");
 
   return (
     <AdminLayout title="Banners & Images" subtitle="Replace the banner photos and other pictures on your website. Use photos of the same shape for the best look.">
       {!ed.value ? (
         <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
       ) : (
+        <LivePreview draft={{ images: ed.value }} path={previewPath}>
         <div className="space-y-8">
           {groups.map((g) => (
             <section key={g}>
@@ -89,6 +104,7 @@ export default function ImagesPage() {
                       key={img.path}
                       img={img}
                       value={ed.value![img.path]}
+                      onPreview={() => setPreviewPath(pageFor(img.path))}
                       onChange={(url) =>
                         ed.update((m) => {
                           const next = { ...m };
@@ -105,6 +121,7 @@ export default function ImagesPage() {
           <p className="text-[13px] text-slate-500">Your logo is changed in Logo & Colours. Blog, package and gallery photos are added on their own pages.</p>
           <SaveRow {...ed} onSave={ed.save} />
         </div>
+        </LivePreview>
       )}
     </AdminLayout>
   );

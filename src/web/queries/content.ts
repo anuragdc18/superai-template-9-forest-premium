@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { client, orpc } from "../lib/api";
 import { DEMO } from "../lib/demo";
+import { usePreviewDraft } from "../lib/preview-draft";
 import { DEFAULT_CONTENT, publicContent, type PublicContent } from "../../api/lib/content-schema";
 
 export const FALLBACK_CONTENT: PublicContent = publicContent(DEFAULT_CONTENT);
@@ -8,12 +9,15 @@ export const FALLBACK_CONTENT: PublicContent = publicContent(DEFAULT_CONTENT);
 /** Website content (blog list, packages, reviews, FAQs, gallery, SEO, WhatsApp). Always usable. */
 export function useContent(): PublicContent {
   const { data } = useQuery({ ...orpc.content.get.queryOptions(), staleTime: 60_000, enabled: !DEMO });
-  return data ?? FALLBACK_CONTENT;
+  const draft = usePreviewDraft();
+  const c = data ?? FALLBACK_CONTENT;
+  return draft.images ? { ...c, images: draft.images } : c;
 }
 
 /** One blog post (+ related) by slug. */
 export function usePost(slug: string) {
-  return useQuery({
+  const draft = usePreviewDraft();
+  const q = useQuery({
     queryKey: ["post", slug],
     enabled: !!slug,
     retry: false,
@@ -27,6 +31,9 @@ export function usePost(slug: string) {
       return client.content.post({ slug });
     },
   });
+  // admin live preview: show the post being edited (even if it is not saved yet)
+  if (draft.post && draft.post.post.slug === slug) return { ...q, data: draft.post, isPending: false, isError: false } as typeof q;
+  return q;
 }
 
 // ───────────── admin ─────────────

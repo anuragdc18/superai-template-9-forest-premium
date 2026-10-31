@@ -6,6 +6,7 @@ import {
   Bot,
   ChevronDown,
   ExternalLink,
+  Eye,
   Inbox,
   LayoutDashboard,
   Loader2,
@@ -35,6 +36,7 @@ type NavItem = { to: string; label: string; icon: typeof Inbox; badge?: "new" | 
 const NAV: NavItem[] = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/leads", label: "Leads", icon: Inbox, badge: "new" },
+  { to: "/admin/preview", label: "Preview Website", icon: Eye },
   { to: "/admin/blog", label: "Blog", icon: FileText, group: "Website content" },
   { to: "/admin/packages", label: "Packages", icon: Package },
   { to: "/admin/services", label: "Services", icon: ListChecks },
